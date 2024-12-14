@@ -22,22 +22,35 @@ export default function DashboardLayout() {
   return (
     <DrawerRoot placement={"start"}>
       <DrawerBackdrop />
-      <Container as={Flex} py={4} justifyContent={"space-between"}>
-        <Flex alignItems={"center"}>
-          <DrawerTrigger asChild>
-            <IconButton mr={4} display={{ base: "flex", lg: "none" }}>
-              <LuMenu />
-            </IconButton>
-          </DrawerTrigger>
-          <Heading size={"2xl"} fontWeight={"bold"}>
-            PH Admin
-          </Heading>
-        </Flex>
-        <Button>Logout</Button>
-      </Container>
-      <Container as={Flex} gapX={4}>
-        <Box flexBasis={280} display={{ base: "none", lg: "block" }}>
-          <Box>
+      <Box
+        position={"sticky"}
+        top={0}
+        bg={"bg"}
+        zIndex={20}
+        // borderBottomWidth={"thin"}
+      >
+        <Container as={Flex} py={4} justifyContent={"space-between"}>
+          <Flex alignItems={"center"}>
+            <DrawerTrigger asChild>
+              <IconButton mr={4} display={{ base: "flex", lg: "none" }}>
+                <LuMenu />
+              </IconButton>
+            </DrawerTrigger>
+            <Heading size={"2xl"} fontWeight={"bold"}>
+              PH Admin
+            </Heading>
+          </Flex>
+          <Button>Logout</Button>
+        </Container>
+      </Box>
+      <Container px={0} as={Flex}>
+        <Box
+          flexBasis={280}
+          p={2}
+          display={{ base: "none", lg: "block" }}
+          // borderRightWidth={"thin"}
+        >
+          <Box p={2} position={"sticky"} top={"80px"}>
             {["People", "Services", "Academy", "Activity"].map(
               (item, index) => (
                 <Box
@@ -50,13 +63,15 @@ export default function DashboardLayout() {
                   _hover={{ bg: "bg.muted" }}
                   asChild
                 >
-                  <Link to={"/people"}>{item}</Link>
+                  <Link to={"/admin/people"}>{item}</Link>
                 </Box>
               )
             )}
           </Box>
         </Box>
-        <Outlet />
+        <Box p={4} w={"full"}>
+          <Outlet />
+        </Box>
       </Container>
 
       <DrawerContent rounded={"md"}>

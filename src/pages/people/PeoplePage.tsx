@@ -1,4 +1,6 @@
-import { Box, Flex, Stack, Table } from "@chakra-ui/react";
+import { Button, Flex, Stack, Table } from "@chakra-ui/react";
+import { LuPlus } from "react-icons/lu";
+import { Link } from "react-router";
 
 const items = [
   { id: 1, name: "Laptop", category: "Electronics", price: 999.99 },
@@ -10,7 +12,14 @@ const items = [
 
 export default function PeoplePage() {
   return (
-    <Stack gap="10"  w={"full"}>
+    <Stack gap="10" w={"full"}>
+      <Flex>
+        <Button asChild>
+          <Link to={"/admin/people/new"}>
+            <LuPlus /> Add
+          </Link>
+        </Button>
+      </Flex>
       <Table.Root size={"lg"}>
         <Table.Header>
           <Table.Row>
