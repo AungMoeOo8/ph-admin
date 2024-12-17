@@ -15,10 +15,23 @@ import {
   Heading,
   IconButton,
 } from "@chakra-ui/react";
-import { Link, Outlet } from "react-router";
+import { NavLink, Outlet } from "react-router";
 import { LuMenu } from "react-icons/lu";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase/firebaseConfig";
+
+const navLinks = [
+  {name: "People", to: "/admin/people"},
+  {name: "Service", to: "/admin/service"},
+  {name: "Academy", to: "/admin/academy"},
+  {name: "Activity", to: "/admin/activity"},
+]
 
 export default function DashboardLayout() {
+
+  async function handleLogout() {
+    await signOut(auth)
+  }
   return (
     <DrawerRoot placement={"start"}>
       <DrawerBackdrop />
@@ -40,7 +53,7 @@ export default function DashboardLayout() {
               PH Admin
             </Heading>
           </Flex>
-          <Button>Logout</Button>
+          <Button onClick={handleLogout}>Logout</Button>
         </Container>
       </Box>
       <Container px={0} as={Flex}>
@@ -51,30 +64,34 @@ export default function DashboardLayout() {
           // borderRightWidth={"thin"}
         >
           <Box p={2} position={"sticky"} top={"80px"}>
-            {["People", "Services", "Academy", "Activity"].map(
-              (item, index) => (
-                <Box
-                  key={index}
-                  p={3}
-                  fontSize={"lg"}
-                  fontWeight={"medium"}
-                  display={"flex"}
-                  rounded={"md"}
-                  _hover={{ bg: "bg.muted" }}
-                  asChild
-                >
-                  <Link to={"/admin/people"}>{item}</Link>
-                </Box>
+            {navLinks.map(
+              (link, index) => (
+                <NavLink key={index} to={link.to}>
+                  {({ isActive }) => (
+                    <Box
+                      p={3}
+                      fontSize={"lg"}
+                      fontWeight={"medium"}
+                      display={"flex"}
+                      rounded={"md"}
+                      _hover={isActive ? undefined : { bg: "bg.muted" }}
+                      color={isActive ? "white" : "black"}
+                      bg={isActive ? "gray.solid" : "white"}
+                    >
+                      {link.name}
+                    </Box>
+                  )}
+                </NavLink>
               )
             )}
           </Box>
         </Box>
-        <Box p={4} w={"full"}>
+        <Box mr={4} p={4} w={"full"}>
           <Outlet />
         </Box>
       </Container>
 
-      <DrawerContent rounded={"md"}>
+      <DrawerContent borderRadius={"lg"}>
         <DrawerCloseTrigger />
         <DrawerHeader>
           <DrawerTitle />

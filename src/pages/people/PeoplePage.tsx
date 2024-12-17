@@ -1,16 +1,21 @@
-import { Button, Flex, Stack, Table } from "@chakra-ui/react";
+import { getPeople } from "@/firebase/peopleService";
+import { PersonProps } from "@/types";
+import { Badge, Button, Flex, Stack, Table } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { Link } from "react-router";
 
-const items = [
-  { id: 1, name: "Laptop", category: "Electronics", price: 999.99 },
-  { id: 2, name: "Coffee Maker", category: "Home Appliances", price: 49.99 },
-  { id: 3, name: "Desk Chair", category: "Furniture", price: 150.0 },
-  { id: 4, name: "Smartphone", category: "Electronics", price: 799.99 },
-  { id: 5, name: "Headphones", category: "Accessories", price: 199.99 },
-];
-
 export default function PeoplePage() {
+  const [peopleList, setPeopleList] = useState<PersonProps[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const people = await getPeople();
+      setPeopleList(people);
+    })();
+    console.log("asdf");
+  }, []);
+
   return (
     <Stack gap="10" w={"full"}>
       <Flex>
@@ -23,17 +28,34 @@ export default function PeoplePage() {
       <Table.Root size={"lg"}>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader>Product</Table.ColumnHeader>
-            <Table.ColumnHeader>Category</Table.ColumnHeader>
-            <Table.ColumnHeader textAlign="end">Price</Table.ColumnHeader>
+            <Table.ColumnHeader>Name</Table.ColumnHeader>
+            <Table.ColumnHeader>Position</Table.ColumnHeader>
+            <Table.ColumnHeader>Visibility</Table.ColumnHeader>
+            <Table.ColumnHeader textAlign={"center"}>
+              Actions
+            </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {items.map((item) => (
-            <Table.Row key={item.id}>
-              <Table.Cell>{item.name}</Table.Cell>
-              <Table.Cell>{item.category}</Table.Cell>
-              <Table.Cell textAlign="end">{item.price}</Table.Cell>
+          {peopleList.map((person) => (
+            <Table.Row key={person.id}>
+              <Table.Cell>{person.name}</Table.Cell>
+              <Table.Cell>
+                {person.position == "professional" ? "Professional" : "Member"}
+              </Table.Cell>
+              <Table.Cell>
+                <Badge
+                  size={"lg"}
+                  colorPalette={person.visibility ? "green" : "orange"}
+                >
+                  {person.visibility ? "Public" : "Private"}
+                </Badge>
+              </Table.Cell>
+              <Table.Cell display={"flex"} justifyContent={"center"}>
+                <Button asChild>
+                  <Link to={`/admin/people/${person.id}/edit`}>Edit</Link>
+                </Button>
+              </Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>

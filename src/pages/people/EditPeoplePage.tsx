@@ -1,10 +1,10 @@
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
+import { getPersonById } from "@/firebase/peopleService";
 import { PersonProps } from "@/types";
 import {
   Box,
-  Button,
   createListCollection,
   Fieldset,
   Flex,
@@ -17,7 +17,9 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { useParams } from "react-router";
 
 const positons = createListCollection({
   items: [
@@ -26,20 +28,37 @@ const positons = createListCollection({
   ],
 });
 
-export default function AddPeoplePage() {
-  // const [imageUrl, setImageUrl] = useState("https://png.pngtree.com/png-clipart/20210604/ourmid/pngtree-gray-male-avatar-png-image_3416112.jpg");
+export default function EditPeoplePage() {
+  const { personId } = useParams();
 
-  const { register, handleSubmit, watch, control } = useForm<PersonProps>({
-    values: {
-      id: "",
-      name: "",
-      position: "",
-      roles: [],
-      image: "",
-      biography: "",
-      visibility: false,
-    } as PersonProps,
-  });
+  const { register, handleSubmit, control, watch, setValue } =
+    useForm<PersonProps>({
+      values: {
+        id: "",
+        name: "",
+        position: "",
+        roles: [],
+        image: "",
+        biography: "",
+        visibility: false,
+      } as PersonProps,
+    });
+
+  useEffect(() => {
+    (async () => {
+      const person = await getPersonById(personId!);
+      setValue("id", person.id);
+      setValue("name", person.name);
+      setValue("position", person.position);
+      setValue("image", person.image);
+      setValue("biography", person.biography);
+      setValue("visibility", person.visibility);
+    })();
+  }, []);
+
+  const savePerson: SubmitHandler<PersonProps> = (data) => {
+    console.log(data);
+  };
 
   return (
     <Box>
@@ -79,9 +98,8 @@ export default function AddPeoplePage() {
               />
             </Field>
             <Field label="Roles">
-              <Input />
+              <Input {...register("roles")} />
             </Field>
-
             <Controller
               control={control}
               name="visibility"
@@ -117,7 +135,7 @@ export default function AddPeoplePage() {
           <Textarea rows={5} {...register("biography")} />
         </Field>
 
-        <Button>Save</Button>
+        <Button onClick={handleSubmit(savePerson)}>Save</Button>
       </Fieldset.Root>
     </Box>
   );

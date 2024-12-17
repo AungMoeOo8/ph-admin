@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const {
     VITE_Api_Key,
@@ -24,5 +25,6 @@ const firebaseConfig = {
 const App = initializeApp(firebaseConfig)
 
 export const auth = getAuth(App)
+export const db = getFirestore(App);
 
 export default App;
