@@ -1,8 +1,9 @@
-import { getPeople } from "@/firebase/peopleService";
+import { toaster } from "@/components/ui/toaster";
+import { deletePerson, getPeople } from "@/firebase/peopleService";
 import { PersonProps } from "@/types";
 import { Badge, Button, Flex, Stack, Table } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { LuPlus } from "react-icons/lu";
+import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function PeoplePage() {
@@ -15,6 +16,21 @@ export default function PeoplePage() {
     })();
     console.log("asdf");
   }, []);
+
+  async function handleDeleteBtn(id: string) {
+    const deletePromise = deletePerson(id);
+    toaster.promise(deletePromise, {
+      success: {
+        title: "Successfully deleted",
+        description: "Task done",
+      },
+      error: {
+        title: "Deleting fail",
+        description: "Something wrong with the deletion",
+      },
+      loading: { title: "Deleting...", description: "Please wait" },
+    });
+  }
 
   return (
     <Stack gap="10" w={"full"}>
@@ -51,9 +67,17 @@ export default function PeoplePage() {
                   {person.visibility ? "Public" : "Private"}
                 </Badge>
               </Table.Cell>
-              <Table.Cell display={"flex"} justifyContent={"center"}>
-                <Button asChild>
-                  <Link to={`/admin/people/${person.id}/edit`}>Edit</Link>
+              <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
+                <Button asChild colorPalette={"gray"}>
+                  <Link to={`/admin/people/${person.id}/edit`}>
+                    <LuPencil />
+                  </Link>
+                </Button>
+                <Button
+                  colorPalette={"red"}
+                  onClick={async () => await handleDeleteBtn("asdf")}
+                >
+                  <LuTrash />
                 </Button>
               </Table.Cell>
             </Table.Row>

@@ -1,6 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
+import { Tag } from "@/components/ui/tag";
+import { savePerson } from "@/firebase/peopleService";
 import { PersonProps } from "@/types";
 import {
   Box,
@@ -17,7 +18,9 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 
 const positons = createListCollection({
   items: [
@@ -29,17 +32,44 @@ const positons = createListCollection({
 export default function AddPeoplePage() {
   // const [imageUrl, setImageUrl] = useState("https://png.pngtree.com/png-clipart/20210604/ourmid/pngtree-gray-male-avatar-png-image_3416112.jpg");
 
-  const { register, handleSubmit, watch, control } = useForm<PersonProps>({
-    values: {
-      id: "",
-      name: "",
-      position: "",
-      roles: [],
-      image: "",
-      biography: "",
-      visibility: false,
-    } as PersonProps,
-  });
+  const navigate = useNavigate();
+
+  const { register, handleSubmit, watch, control, getValues, setValue } =
+    useForm<PersonProps>({
+      defaultValues: {
+        id: "",
+        name: "",
+        position: "",
+        roles: [],
+        image: "",
+        biography: "",
+        visibility: false,
+      } as PersonProps,
+    });
+
+  const [inputValue, setInputValue] = useState("");
+
+  const handleSaveBtn = async () => {
+    const person = getValues();
+    person.id = person.name.trim().toLowerCase();
+    await savePerson(person);
+
+    navigate("/admin/people", { replace: true });
+  };
+
+  const addRole = () => {
+    const roles = getValues("roles");
+    if (inputValue.trim() && !roles.includes(inputValue.trim())) {
+      const updatedRoles = [...roles, inputValue.trim()];
+      setValue("roles", updatedRoles);
+    }
+    setInputValue("");
+  };
+
+  const removeRole = (role: string) => {
+    const roles = getValues("roles").filter((r) => r !== role);
+    setValue("roles", roles);
+  };
 
   return (
     <Box>
@@ -56,9 +86,9 @@ export default function AddPeoplePage() {
                 render={({ field }) => (
                   <SelectRoot
                     name={field.name}
-                    value={[field.value]}
-                    collection={positons}
-                    onValueChange={({ value }) => field.onChange(value)}
+                    value={field.value}
+                    items={positons}
+                    onValueChange={({value}) => field.onChange(value)}
                   >
                     <SelectTrigger>
                       <SelectValueText placeholder="Select position" />
@@ -79,7 +109,39 @@ export default function AddPeoplePage() {
               />
             </Field>
             <Field label="Roles">
-              <Input />
+              <Controller
+                name="roles"
+                control={control}
+                render={({ field }) => (
+                  <Box>
+                    {field.value.map((role, index) => (
+                      <Tag
+                        key={index}
+                        size="lg"
+                        colorScheme="blue"
+                        borderRadius="full"
+                        m={1}
+                        closable
+                        onClick={() => removeRole(role)}
+                      >
+                        {role}
+                      </Tag>
+                    ))}
+                  </Box>
+                )}
+              />
+              <Input
+                id="role-input"
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addRole();
+                  }
+                }}
+              />
             </Field>
 
             <Controller
@@ -117,7 +179,7 @@ export default function AddPeoplePage() {
           <Textarea rows={5} {...register("biography")} />
         </Field>
 
-        <Button>Save</Button>
+        <Button onClick={handleSubmit(handleSaveBtn)}>Save</Button>
       </Fieldset.Root>
     </Box>
   );

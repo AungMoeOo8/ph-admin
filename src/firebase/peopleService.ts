@@ -1,5 +1,5 @@
 import { PersonProps } from "@/types";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 export async function getPeople() {
@@ -21,8 +21,12 @@ export async function getPersonById(id: string) {
 }
 
 export async function savePerson(person: PersonProps) {
-
     const docRef = await addDoc(collection(db, "people"), person)
     person.id = docRef.id
     return person;
+}
+
+export async function deletePerson(id: string) {
+    const personRef = doc(db, "people", id);
+    await deleteDoc(personRef);
 }
