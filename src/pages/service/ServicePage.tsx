@@ -1,41 +1,29 @@
-import { toaster } from "@/components/ui/toaster";
-import { PersonProps } from "@/firebase/people/peopleProps";
-import { deletePerson, getPeople } from "@/firebase/people/peopleService";
+import { ServiceProps } from "@/firebase/service/serviceProps";
+import { getservices } from "@/firebase/service/serviceService";
 import { Badge, Button, Flex, Stack, Table } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
-export default function PeoplePage() {
-  const [peopleList, setPeopleList] = useState<PersonProps[]>([]);
+export default function ServicePage() {
+  const [serviceList, setServiceList] = useState<ServiceProps[]>([]);
 
   useEffect(() => {
     (async () => {
-      const people = await getPeople();
-      setPeopleList(people);
+      const services = await getservices();
+      setServiceList(services);
     })();
   }, []);
 
   async function handleDeleteBtn(id: string) {
-    const deletePromise = deletePerson(id);
-    toaster.promise(deletePromise, {
-      success: {
-        title: "Successfully deleted",
-        description: "Task done",
-      },
-      error: {
-        title: "Deleting fail",
-        description: "Something wrong with the deletion",
-      },
-      loading: { title: "Deleting...", description: "Please wait" },
-    });
+
   }
 
   return (
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/admin/people/new"}>
+          <Link to={"/admin/service/new"}>
             <LuPlus /> Add
           </Link>
         </Button>
@@ -44,7 +32,7 @@ export default function PeoplePage() {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeader>Name</Table.ColumnHeader>
-            <Table.ColumnHeader>Position</Table.ColumnHeader>
+            <Table.ColumnHeader>Provider</Table.ColumnHeader>
             <Table.ColumnHeader>Visibility</Table.ColumnHeader>
             <Table.ColumnHeader textAlign={"center"}>
               Actions
@@ -52,23 +40,23 @@ export default function PeoplePage() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {peopleList.map((person) => (
-            <Table.Row key={person.id}>
-              <Table.Cell>{person.name}</Table.Cell>
+          {serviceList.map((service) => (
+            <Table.Row key={service.id}>
+              <Table.Cell>{service.name}</Table.Cell>
               <Table.Cell>
-                {person.position == "professional" ? "Professional" : "Member"}
+                {service.provider}
               </Table.Cell>
               <Table.Cell>
                 <Badge
                   size={"lg"}
-                  colorPalette={person.visibility ? "green" : "orange"}
+                  colorPalette={service.visibility ? "green" : "orange"}
                 >
-                  {person.visibility ? "Public" : "Private"}
+                  {service.visibility ? "Public" : "Private"}
                 </Badge>
               </Table.Cell>
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
                 <Button asChild colorPalette={"gray"}>
-                  <Link to={`/admin/people/${person.id}/edit`}>
+                  <Link to={`/admin/people/${service.id}/edit`}>
                     <LuPencil />
                   </Link>
                 </Button>

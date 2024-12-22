@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { getPersonById } from "@/firebase/peopleService";
-import { PersonProps } from "@/types";
+import { PersonProps } from "@/firebase/people/peopleProps";
+import { getPersonById } from "@/firebase/people/peopleService";
+
 import {
   Box,
   createListCollection,

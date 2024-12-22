@@ -1,8 +1,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { savePerson } from "@/firebase/peopleService";
-import { PersonProps } from "@/types";
+import { PersonProps } from "@/firebase/people/peopleProps";
+import { savePerson } from "@/firebase/people/peopleService";
 import {
   Box,
   Button,
@@ -43,8 +43,8 @@ export default function AddPeoplePage() {
         roles: [],
         image: "",
         biography: "",
-        visibility: false,
-      } as PersonProps,
+        status: false,
+      },
     });
 
   const [inputValue, setInputValue] = useState("");
@@ -86,9 +86,9 @@ export default function AddPeoplePage() {
                 render={({ field }) => (
                   <SelectRoot
                     name={field.name}
-                    value={field.value}
-                    items={positons}
-                    onValueChange={({value}) => field.onChange(value)}
+                    value={[field.value]}
+                    collection={positons}
+                    onValueChange={({value}) => field.onChange(value[0])}
                   >
                     <SelectTrigger>
                       <SelectValueText placeholder="Select position" />
@@ -98,7 +98,7 @@ export default function AddPeoplePage() {
                         <SelectItem
                           item={postion}
                           key={postion.value}
-                          defaultChecked
+                          // defaultChecked
                         >
                           {postion.label}
                         </SelectItem>
@@ -146,7 +146,7 @@ export default function AddPeoplePage() {
 
             <Controller
               control={control}
-              name="visibility"
+              name="status"
               render={({ field }) => (
                 <Field>
                   <Checkbox

@@ -1,6 +1,6 @@
-import { PersonProps } from "@/types";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "./firebaseConfig";
+import { db } from "../firebaseConfig";
+import { PersonProps } from "./peopleProps";
 
 export async function getPeople() {
     const people: PersonProps[] = [];

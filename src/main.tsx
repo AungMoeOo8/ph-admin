@@ -8,6 +8,8 @@ import PeoplePage from "./pages/people/PeoplePage.tsx";
 import LoginPage from "./pages/auth/LoginPage.tsx";
 import AddPeoplePage from "./pages/people/AddPeoplePage.tsx";
 import EditPeoplePage from "./pages/people/EditPeoplePage.tsx";
+import ServicePage from "./pages/service/ServicePage.tsx";
+import AddServicePage from "./pages/service/AddServicePage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,10 +17,16 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="admin/people" element={<DashboardLayout />}>
-            <Route index element={<PeoplePage />} />
-            <Route path="new" element={<AddPeoplePage />} />
-            <Route path=":personId/edit" element={<EditPeoplePage />} />
+          <Route path="admin" element={<DashboardLayout />}>
+            <Route path="people">
+              <Route index element={<PeoplePage />} />
+              <Route path="new" element={<AddPeoplePage />} />
+              <Route path=":personId/edit" element={<EditPeoplePage />} />
+            </Route>
+            <Route path="service">
+              <Route index element={<ServicePage />} />
+              <Route path="new" element={<AddServicePage />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>
