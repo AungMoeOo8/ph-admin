@@ -1,6 +1,6 @@
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth } from "@/features/firebase/firebaseConfig";
 import { Button, Center, Fieldset, Input } from "@chakra-ui/react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useReducer } from "react";

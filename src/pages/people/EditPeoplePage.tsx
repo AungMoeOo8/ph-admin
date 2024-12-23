@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { PersonProps } from "@/firebase/people/peopleProps";
-import { getPersonById } from "@/firebase/people/peopleService";
+import { Tag } from "@/components/ui/tag";
+import { PersonProps } from "@/features/firebase/people/peopleProps";
+import { getPersonById } from "@/features/firebase/people/peopleService";
 
 import {
   Box,
   createListCollection,
   Fieldset,
   Flex,
+  Heading,
   Image,
   Input,
   SelectContent,
@@ -18,7 +20,7 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useParams } from "react-router";
 
@@ -32,7 +34,7 @@ const positons = createListCollection({
 export default function EditPeoplePage() {
   const { personId } = useParams();
 
-  const { register, handleSubmit, control, watch, setValue } =
+  const { register, handleSubmit, control, watch, getValues, setValue } =
     useForm<PersonProps>({
       values: {
         id: "",
@@ -45,12 +47,15 @@ export default function EditPeoplePage() {
       } as PersonProps,
     });
 
+    const [inputValue, setInputValue] = useState("");
+
   useEffect(() => {
     (async () => {
       const person = await getPersonById(personId!);
       setValue("id", person.id);
       setValue("name", person.name);
       setValue("position", person.position);
+      setValue("roles", person.roles);
       setValue("image", person.image);
       setValue("biography", person.biography);
       setValue("visibility", person.visibility);
@@ -61,14 +66,31 @@ export default function EditPeoplePage() {
     console.log(data);
   };
 
+  const addRole = () => {
+    const roles = getValues("roles");
+    if (inputValue.trim() && !roles.includes(inputValue.trim())) {
+      const updatedRoles = [...roles, inputValue.trim()];
+      setValue("roles", updatedRoles);
+    }
+    setInputValue("");
+  };
+
+  const removeRole = (role: string) => {
+    const roles = getValues("roles").filter((r) => r !== role);
+    setValue("roles", roles);
+  };
+
   return (
     <Box>
       <Fieldset.Root>
+        <Heading size="2xl">Edit person</Heading>
         <Flex gap={4}>
           <Fieldset.Content>
+
             <Field label="Name">
               <Input {...register("name")} />
             </Field>
+
             <Field label="Position">
               <Controller
                 control={control}
@@ -98,9 +120,43 @@ export default function EditPeoplePage() {
                 )}
               />
             </Field>
+            
             <Field label="Roles">
-              <Input {...register("roles")} />
+              <Controller
+                name="roles"
+                control={control}
+                render={({ field }) => (
+                  <Box>
+                    {field.value.map((role, index) => (
+                      <Tag
+                        key={index}
+                        size="lg"
+                        colorScheme="blue"
+                        borderRadius="full"
+                        m={1}
+                        closable
+                        onClick={() => removeRole(role)}
+                      >
+                        {role}
+                      </Tag>
+                    ))}
+                  </Box>
+                )}
+              />
+              <Input
+                id="role-input"
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addRole();
+                  }
+                }}
+              />
             </Field>
+
             <Controller
               control={control}
               name="visibility"
@@ -115,6 +171,7 @@ export default function EditPeoplePage() {
                 </Field>
               )}
             />
+            
           </Fieldset.Content>
 
           <Fieldset.Content marginTop={0}>

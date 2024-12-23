@@ -16,21 +16,20 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router";
-import { LuMenu } from "react-icons/lu";
+import { LuLogOut, LuMenu } from "react-icons/lu";
 import { signOut } from "firebase/auth";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth } from "@/features/firebase/firebaseConfig";
 
 const navLinks = [
-  {name: "People", to: "/admin/people"},
-  {name: "Service", to: "/admin/service"},
-  {name: "Academy", to: "/admin/academy"},
-  {name: "Activity", to: "/admin/activity"},
-]
+  { name: "People", to: "/admin/people" },
+  { name: "Service", to: "/admin/service" },
+  { name: "Academy", to: "/admin/academy" },
+  { name: "Activity", to: "/admin/activity" },
+];
 
 export default function DashboardLayout() {
-
   async function handleLogout() {
-    await signOut(auth)
+    await signOut(auth);
   }
   return (
     <DrawerRoot placement={"start"}>
@@ -53,7 +52,9 @@ export default function DashboardLayout() {
               PH Admin
             </Heading>
           </Flex>
-          <Button onClick={handleLogout}>Logout</Button>
+          <Button onClick={handleLogout}>
+            Logout
+          </Button>
         </Container>
       </Box>
       <Container px={0} as={Flex}>
@@ -64,29 +65,27 @@ export default function DashboardLayout() {
           // borderRightWidth={"thin"}
         >
           <Box p={2} position={"sticky"} top={"80px"}>
-            {navLinks.map(
-              (link, index) => (
-                <NavLink key={index} to={link.to}>
-                  {({ isActive }) => (
-                    <Box
-                      p={3}
-                      fontSize={"lg"}
-                      fontWeight={"medium"}
-                      display={"flex"}
-                      rounded={"md"}
-                      _hover={isActive ? undefined : { bg: "bg.muted" }}
-                      color={isActive ? "white" : "black"}
-                      bg={isActive ? "gray.solid" : "white"}
-                    >
-                      {link.name}
-                    </Box>
-                  )}
-                </NavLink>
-              )
-            )}
+            {navLinks.map((link, index) => (
+              <NavLink key={index} to={link.to}>
+                {({ isActive }) => (
+                  <Box
+                    p={3}
+                    fontSize={"lg"}
+                    fontWeight={"medium"}
+                    display={"flex"}
+                    rounded={"md"}
+                    _hover={isActive ? undefined : { bg: "bg.muted" }}
+                    color={isActive ? "white" : "black"}
+                    bg={isActive ? "gray.solid" : "white"}
+                  >
+                    {link.name}
+                  </Box>
+                )}
+              </NavLink>
+            ))}
           </Box>
         </Box>
-        <Box mr={4} p={4} w={"full"}>
+        <Box mr={{ base: "", lg: 4 }} p={4} w={"full"}>
           <Outlet />
         </Box>
       </Container>

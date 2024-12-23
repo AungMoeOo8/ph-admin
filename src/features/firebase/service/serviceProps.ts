@@ -5,5 +5,5 @@ export type ServiceProps = {
   description: string;
   fees: { type: string; amount: number; description?: string }[];
   ending?: string;
-  status: boolean
+  visibility: boolean
 };

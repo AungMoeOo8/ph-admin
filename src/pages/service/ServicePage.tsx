@@ -1,5 +1,5 @@
-import { ServiceProps } from "@/firebase/service/serviceProps";
-import { getservices } from "@/firebase/service/serviceService";
+import { ServiceProps } from "@/features/firebase/service/serviceProps";
+import { getservices } from "@/features/firebase/service/serviceService";
 import { Badge, Button, Flex, Stack, Table } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
@@ -15,10 +15,6 @@ export default function ServicePage() {
     })();
   }, []);
 
-  async function handleDeleteBtn(id: string) {
-
-  }
-
   return (
     <Stack gap="10" w={"full"}>
       <Flex>
@@ -33,7 +29,7 @@ export default function ServicePage() {
           <Table.Row>
             <Table.ColumnHeader>Name</Table.ColumnHeader>
             <Table.ColumnHeader>Provider</Table.ColumnHeader>
-            <Table.ColumnHeader>Visibility</Table.ColumnHeader>
+            <Table.ColumnHeader>Status</Table.ColumnHeader>
             <Table.ColumnHeader textAlign={"center"}>
               Actions
             </Table.ColumnHeader>
@@ -62,7 +58,7 @@ export default function ServicePage() {
                 </Button>
                 <Button
                   colorPalette={"red"}
-                  onClick={async () => await handleDeleteBtn("asdf")}
+                  onClick={async () => {}}
                 >
                   <LuTrash />
                 </Button>

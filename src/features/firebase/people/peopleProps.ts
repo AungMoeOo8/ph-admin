@@ -5,5 +5,5 @@ export type PersonProps = {
     position: string;
     roles: string[];
     biography: string,
-    status: boolean;
+    visibility: boolean;
 };

@@ -1,7 +1,14 @@
 import { toaster } from "@/components/ui/toaster";
-import { PersonProps } from "@/firebase/people/peopleProps";
-import { deletePerson, getPeople } from "@/firebase/people/peopleService";
-import { Badge, Button, Flex, Stack, Table } from "@chakra-ui/react";
+import { PersonProps } from "@/features/firebase/people/peopleProps";
+import { deletePerson, getPeople } from "@/features/firebase/people/peopleService";
+import {
+  Badge,
+  Button,
+  Flex,
+  IconButton,
+  Stack,
+  Table,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
@@ -45,7 +52,7 @@ export default function PeoplePage() {
           <Table.Row>
             <Table.ColumnHeader>Name</Table.ColumnHeader>
             <Table.ColumnHeader>Position</Table.ColumnHeader>
-            <Table.ColumnHeader>Visibility</Table.ColumnHeader>
+            <Table.ColumnHeader>Status</Table.ColumnHeader>
             <Table.ColumnHeader textAlign={"center"}>
               Actions
             </Table.ColumnHeader>
@@ -67,17 +74,17 @@ export default function PeoplePage() {
                 </Badge>
               </Table.Cell>
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
-                <Button asChild colorPalette={"gray"}>
+                <IconButton asChild colorPalette={"cyan"}>
                   <Link to={`/admin/people/${person.id}/edit`}>
                     <LuPencil />
                   </Link>
-                </Button>
-                <Button
+                </IconButton>
+                <IconButton
                   colorPalette={"red"}
                   onClick={async () => await handleDeleteBtn("asdf")}
                 >
                   <LuTrash />
-                </Button>
+                </IconButton>
               </Table.Cell>
             </Table.Row>
           ))}

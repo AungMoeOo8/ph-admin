@@ -1,14 +1,16 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { PersonProps } from "@/firebase/people/peopleProps";
-import { savePerson } from "@/firebase/people/peopleService";
+import { PersonProps } from "@/features/firebase/people/peopleProps";
+import { v4 as uuidv4 } from 'uuid';
+// import { savePerson } from "@/firebase/people/peopleService";
 import {
   Box,
   Button,
   createListCollection,
   Fieldset,
   Flex,
+  Heading,
   Image,
   Input,
   SelectContent,
@@ -30,7 +32,6 @@ const positons = createListCollection({
 });
 
 export default function AddPeoplePage() {
-  // const [imageUrl, setImageUrl] = useState("https://png.pngtree.com/png-clipart/20210604/ourmid/pngtree-gray-male-avatar-png-image_3416112.jpg");
 
   const navigate = useNavigate();
 
@@ -43,7 +44,7 @@ export default function AddPeoplePage() {
         roles: [],
         image: "",
         biography: "",
-        status: false,
+        visibility: false,
       },
     });
 
@@ -51,8 +52,9 @@ export default function AddPeoplePage() {
 
   const handleSaveBtn = async () => {
     const person = getValues();
-    person.id = person.name.trim().toLowerCase();
-    await savePerson(person);
+    person.id = uuidv4();
+    // await savePerson(person);
+    console.log({ person });
 
     navigate("/admin/people", { replace: true });
   };
@@ -74,11 +76,14 @@ export default function AddPeoplePage() {
   return (
     <Box>
       <Fieldset.Root>
+        <Heading size={"2xl"}>Create new person</Heading>
         <Flex gap={4}>
           <Fieldset.Content>
+
             <Field label="Name">
               <Input {...register("name")} />
             </Field>
+
             <Field label="Position">
               <Controller
                 control={control}
@@ -88,7 +93,7 @@ export default function AddPeoplePage() {
                     name={field.name}
                     value={[field.value]}
                     collection={positons}
-                    onValueChange={({value}) => field.onChange(value[0])}
+                    onValueChange={({ value }) => field.onChange(value[0])}
                   >
                     <SelectTrigger>
                       <SelectValueText placeholder="Select position" />
@@ -108,6 +113,7 @@ export default function AddPeoplePage() {
                 )}
               />
             </Field>
+
             <Field label="Roles">
               <Controller
                 name="roles"
@@ -146,7 +152,7 @@ export default function AddPeoplePage() {
 
             <Controller
               control={control}
-              name="status"
+              name="visibility"
               render={({ field }) => (
                 <Field>
                   <Checkbox
@@ -158,6 +164,7 @@ export default function AddPeoplePage() {
                 </Field>
               )}
             />
+            
           </Fieldset.Content>
 
           <Fieldset.Content marginTop={0}>
