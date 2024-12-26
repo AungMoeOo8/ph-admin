@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { PersonProps } from "@/features/firebase/people/peopleProps";
-import { getPersonById } from "@/features/firebase/people/peopleService";
+import { getPersonById, PersonProps, updatePerson } from "@/features/wordpress/people.service";
 
 import {
   Box,
@@ -22,17 +21,18 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const positons = createListCollection({
   items: [
-    { label: "Professional", value: "professional" },
-    { label: "Member", value: "member" },
+    { label: "Professional", value: "PROFESSIONAL" },
+    { label: "Member", value: "MEMBER" },
   ],
 });
 
 export default function EditPeoplePage() {
   const { personId } = useParams();
+  const navigate = useNavigate();
 
   const { register, handleSubmit, control, watch, getValues, setValue } =
     useForm<PersonProps>({
@@ -44,6 +44,7 @@ export default function EditPeoplePage() {
         image: "",
         biography: "",
         visibility: false,
+        indexNumber: 0
       } as PersonProps,
     });
 
@@ -62,8 +63,10 @@ export default function EditPeoplePage() {
     })();
   }, []);
 
-  const savePerson: SubmitHandler<PersonProps> = (data) => {
-    console.log(data);
+  const savePerson: SubmitHandler<PersonProps> = async (person) => {
+    await updatePerson(person.id, person);
+
+    navigate("/admin/people", { replace: true });
   };
 
   const addRole = () => {
@@ -100,7 +103,7 @@ export default function EditPeoplePage() {
                     name={field.name}
                     value={[field.value]}
                     collection={positons}
-                    onValueChange={({ value }) => field.onChange(value)}
+                    onValueChange={({ value }) => field.onChange(value[0])}
                   >
                     <SelectTrigger>
                       <SelectValueText placeholder="Select position" />

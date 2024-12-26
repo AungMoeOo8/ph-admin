@@ -10,6 +10,7 @@ import AddPeoplePage from "./pages/people/AddPeoplePage.tsx";
 import EditPeoplePage from "./pages/people/EditPeoplePage.tsx";
 import ServicePage from "./pages/service/ServicePage.tsx";
 import AddServicePage from "./pages/service/AddServicePage.tsx";
+import { Toaster } from "./components/ui/toaster.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById("root")!).render(
             </Route>
           </Route>
         </Routes>
+        <Toaster />
       </BrowserRouter>
     </Provider>
   </StrictMode>

@@ -1,6 +1,9 @@
 import { toaster } from "@/components/ui/toaster";
-import { PersonProps } from "@/features/firebase/people/peopleProps";
-import { deletePerson, getPeople } from "@/features/firebase/people/peopleService";
+import {
+  deletePerson,
+  getPeople,
+  PersonProps,
+} from "@/features/wordpress/people.service";
 import {
   Badge,
   Button,
@@ -8,6 +11,7 @@ import {
   IconButton,
   Stack,
   Table,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
@@ -24,17 +28,10 @@ export default function PeoplePage() {
   }, []);
 
   async function handleDeleteBtn(id: string) {
-    const deletePromise = deletePerson(id);
-    toaster.promise(deletePromise, {
-      success: {
-        title: "Successfully deleted",
-        description: "Task done",
-      },
-      error: {
-        title: "Deleting fail",
-        description: "Something wrong with the deletion",
-      },
-      loading: { title: "Deleting...", description: "Please wait" },
+    await deletePerson(id);
+    toaster.create({
+      type: "success",
+      description: "Deleting successful.",
     });
   }
 
@@ -50,8 +47,10 @@ export default function PeoplePage() {
       <Table.Root size={"lg"}>
         <Table.Header>
           <Table.Row>
+            <Table.ColumnHeader>No.</Table.ColumnHeader>
             <Table.ColumnHeader>Name</Table.ColumnHeader>
             <Table.ColumnHeader>Position</Table.ColumnHeader>
+            <Table.ColumnHeader>Roles</Table.ColumnHeader>
             <Table.ColumnHeader>Status</Table.ColumnHeader>
             <Table.ColumnHeader textAlign={"center"}>
               Actions
@@ -59,12 +58,24 @@ export default function PeoplePage() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {peopleList.map((person) => (
+          {peopleList.map((person, index) => (
             <Table.Row key={person.id}>
+              <Table.Cell>{index + 1}</Table.Cell>
+
               <Table.Cell>{person.name}</Table.Cell>
+
               <Table.Cell>
-                {person.position == "professional" ? "Professional" : "Member"}
+                {person.position == "PROFESSIONAL" ? "Professional" : "Member"}
               </Table.Cell>
+
+              <Table.Cell>
+                <Flex gapX={2} fontSize={"sm"} w="fit-content">
+                  {person.roles.slice(0, 2).map((role) => (
+                    <Text display={"inline"}>{role}</Text>
+                  ))}
+                </Flex>
+              </Table.Cell>
+
               <Table.Cell>
                 <Badge
                   size={"lg"}
@@ -73,6 +84,7 @@ export default function PeoplePage() {
                   {person.visibility ? "Public" : "Private"}
                 </Badge>
               </Table.Cell>
+
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
                 <IconButton asChild colorPalette={"cyan"}>
                   <Link to={`/admin/people/${person.id}/edit`}>
@@ -81,7 +93,7 @@ export default function PeoplePage() {
                 </IconButton>
                 <IconButton
                   colorPalette={"red"}
-                  onClick={async () => await handleDeleteBtn("asdf")}
+                  onClick={async () => await handleDeleteBtn(person.id)}
                 >
                   <LuTrash />
                 </IconButton>

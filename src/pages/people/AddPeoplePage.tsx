@@ -1,9 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { PersonProps } from "@/features/firebase/people/peopleProps";
 import { v4 as uuidv4 } from 'uuid';
-// import { savePerson } from "@/firebase/people/peopleService";
 import {
   Box,
   Button,
@@ -21,13 +19,14 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { createPerson, PersonProps } from "@/features/wordpress/people.service";
 
 const positons = createListCollection({
   items: [
-    { label: "Professional", value: "professional" },
-    { label: "Member", value: "member" },
+    { label: "Professional", value: "PROFESSIONAL" },
+    { label: "Member", value: "MEMBER" },
   ],
 });
 
@@ -45,16 +44,15 @@ export default function AddPeoplePage() {
         image: "",
         biography: "",
         visibility: false,
+        indexNumber: 0
       },
     });
 
   const [inputValue, setInputValue] = useState("");
 
-  const handleSaveBtn = async () => {
-    const person = getValues();
+  const handleSaveBtn : SubmitHandler<PersonProps> = async (person) => {
     person.id = uuidv4();
-    // await savePerson(person);
-    console.log({ person });
+    await createPerson(person)
 
     navigate("/admin/people", { replace: true });
   };
@@ -80,11 +78,11 @@ export default function AddPeoplePage() {
         <Flex gap={4}>
           <Fieldset.Content>
 
-            <Field label="Name">
+            <Field label="Name" required>
               <Input {...register("name")} />
             </Field>
 
-            <Field label="Position">
+            <Field label="Position" required>
               <Controller
                 control={control}
                 name="position"
@@ -114,7 +112,7 @@ export default function AddPeoplePage() {
               />
             </Field>
 
-            <Field label="Roles">
+            <Field label="Roles" required>
               <Controller
                 name="roles"
                 control={control}
@@ -173,7 +171,7 @@ export default function AddPeoplePage() {
               objectFit={"contain"}
               aspectRatio={"golden"}
             />
-            <Field label="Image Url">
+            <Field label="Image Url" required>
               <Input
                 placeholder="https://example.com/images/image.jpg"
                 {...register("image")}
@@ -182,7 +180,7 @@ export default function AddPeoplePage() {
           </Fieldset.Content>
         </Flex>
 
-        <Field label="Biography">
+        <Field label="Biography" required>
           <Textarea rows={5} {...register("biography")} />
         </Field>
 
