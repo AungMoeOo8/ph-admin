@@ -1,7 +1,9 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { NumberInputField } from "@/components/ui/number-input";
-import { ServiceProps } from "@/features/firebase/service/serviceProps";
+import {
+  ServiceProps,
+} from "@/features/wordpress/service.service";
 import {
   Box,
   Button,
@@ -27,27 +29,54 @@ import {
   LuPencil,
   LuTrash2,
 } from "react-icons/lu";
-import { useNavigate } from "react-router";
+import { v4 as uuidv4 } from "uuid";
+// import { useNavigate } from "react-router";
+import { useState } from "react";
 
 export default function AddPeoplePage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const { register, handleSubmit, control } = useForm<ServiceProps>({
-    defaultValues: {
-      id: "",
-      name: "",
-      visibility: false,
-    },
+  const { register, handleSubmit, control, watch, getValues, setValue } =
+    useForm<ServiceProps>({
+      defaultValues: {
+        id: "",
+        provider: "",
+        name: "",
+        description: "",
+        fees: [],
+        ending: "",
+        indexNumber: 0,
+        visibility: false,
+      },
+    });
+
+  const [feeInput, setFeeInput] = useState<{
+    type: string;
+    amount: number;
+    description: string;
+  }>({
+    type: "",
+    amount: 0,
+    description: "",
   });
 
-  const handleSaveBtn: SubmitHandler<ServiceProps> = (data) => {
-    // const person = getValues();
-    // person.id = person.name.trim().toLowerCase();
-    // await savePerson(person);
+  const handleFeeInput = () => {
+    const fees = getValues("fees");
+    setValue("fees", [...fees, feeInput]);
+    setFeeInput({
+      type: "",
+      amount: 0,
+      description: "",
+    });
+  };
 
-    console.log({ service: data });
+  const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
+    service.id = uuidv4();
+    // await createService(service);
 
-    navigate("/admin/service", { replace: true });
+    console.log({ service: service });
+
+    // navigate("/admin/service", { replace: true });
   };
 
   return (
@@ -90,18 +119,54 @@ export default function AddPeoplePage() {
         <Heading size={"2xl"}>Fees</Heading>
         <Flex gap={8} flexDir={{ base: "column", lg: "row" }}>
           <Flex flexBasis={"1/2"}>
-            <Fieldset.Root>
+            <Fieldset.Root
+              onKeyDown={(e) => e.key == "Enter" && console.log("Entered")}
+            >
               <Field required label="Type">
-                <Input />
+                <Input value={feeInput.type}
+                  onChange={(e) =>
+                    setFeeInput((prev) => {
+                      return {
+                        type: e.target.value,
+                        amount: prev.amount,
+                        description: prev.description,
+                      };
+                    })
+                  }
+                />
               </Field>
               <Field required label="Amount">
                 <NumberInputRoot min={0}>
-                  <NumberInputField />
+                  <NumberInputField
+                  value={feeInput.amount}
+                    onChange={(e) =>
+                      setFeeInput((prev) => {
+                        return {
+                          type: prev.type,
+                          amount: parseFloat(e.target.value),
+                          description: prev.description,
+                        };
+                      })
+                    }
+                  />
                 </NumberInputRoot>
               </Field>
               <Field label="Description">
-                <Textarea rows={5} />
+                <Textarea
+                  rows={5}
+                  value={feeInput.description}
+                  onChange={(e) =>
+                    setFeeInput((prev) => {
+                      return {
+                        type: prev.type,
+                        amount: prev.amount,
+                        description: e.target.value,
+                      };
+                    })
+                  }
+                />
               </Field>
+              <Button onClick={handleFeeInput}>Add to fees</Button>
             </Fieldset.Root>
           </Flex>
 
@@ -112,7 +177,7 @@ export default function AddPeoplePage() {
               gap={4}
               flexDir={{ base: "column", lg: "row" }}
             >
-              {["Online", "In Person"].map((item) => (
+              {watch("fees").map((service) => (
                 <Card.Root flexGrow={1}>
                   <Card.Body>
                     <Flex
@@ -121,7 +186,7 @@ export default function AddPeoplePage() {
                       gapX={4}
                     >
                       <Text fontSize={"lg"} fontWeight={"medium"}>
-                        {item}
+                        {service.type}
                       </Text>
 
                       <MenuRoot>
@@ -154,12 +219,10 @@ export default function AddPeoplePage() {
                     </Flex>
                     <Text display={"flex"} alignItems={"center"}>
                       <LuDollarSign />
-                      {Intl.NumberFormat().format(15000)}
+                      {Intl.NumberFormat().format(service.amount)}
                     </Text>
                     <Text mt={4} fontSize={"sm"}>
-                      {
-                        "(One sessionကို မိနစ် 50 ပါရှင့်။ အဆင်ပြေတဲ့အချိန် ညှိနှိုင်းပြီး booking ယူလို့ရပါတယ်ရှင့်။)"
-                      }
+                      {service.description}
                     </Text>
                   </Card.Body>
                 </Card.Root>
