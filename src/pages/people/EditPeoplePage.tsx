@@ -52,7 +52,8 @@ export default function EditPeoplePage() {
 
   useEffect(() => {
     (async () => {
-      const person = await getPersonById(personId!);
+      const response = await getPersonById(personId!);
+      const person = response.data;
       setValue("id", person.id);
       setValue("name", person.name);
       setValue("position", person.position);

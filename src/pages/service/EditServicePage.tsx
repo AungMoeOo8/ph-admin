@@ -1,7 +1,11 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { NumberInputField } from "@/components/ui/number-input";
-import { createService, ServiceProps } from "@/features/wordpress/service.service";
+import {
+  getServiceById,
+  ServiceProps,
+  updateService,
+} from "@/features/wordpress/service.service";
 import {
   Box,
   Button,
@@ -34,9 +38,8 @@ import {
   LuTrash2,
   LuX,
 } from "react-icons/lu";
-import { v4 as uuidv4 } from "uuid";
-import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
 import {
   DialogActionTrigger,
   DialogBody,
@@ -269,10 +272,11 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   );
 };
 
-export default function AddServicePage() {
+export default function EditPeoplePage() {
   const navigate = useNavigate();
+  const { serviceId } = useParams();
 
-  const { register, handleSubmit, control } = useForm<ServiceProps>({
+  const { register, handleSubmit, control, setValue } = useForm<ServiceProps>({
     defaultValues: {
       id: "",
       provider: "",
@@ -285,9 +289,25 @@ export default function AddServicePage() {
     },
   });
 
+  useEffect(() => {
+    (async () => {
+      const response = await getServiceById(serviceId!);
+      const service = response.data;
+      setValue("id", service.id);
+      setValue("provider", service.provider);
+      setValue("name", service.name);
+      setValue("description", service.description);
+      setValue("fees", service.fees);
+      setValue("ending", service.ending);
+      setValue("indexNumber", service.indexNumber);
+      setValue("visibility", service.visibility);
+    })();
+  }, []);
+
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
-    service.id = uuidv4();
-    await createService(service);
+    await updateService(service.id, service);
+
+    console.log({ service: service });
 
     navigate("/admin/service", { replace: true });
   };
@@ -295,7 +315,7 @@ export default function AddServicePage() {
   return (
     <Box>
       <Fieldset.Root>
-        <Heading size={"2xl"}>Create new service</Heading>
+        <Heading size={"2xl"}>Edit service</Heading>
         <Fieldset.Content>
           <Field required label="Name">
             <Input {...register("name")} />

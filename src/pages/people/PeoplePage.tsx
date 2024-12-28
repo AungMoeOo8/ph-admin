@@ -22,7 +22,8 @@ export default function PeoplePage() {
 
   useEffect(() => {
     (async () => {
-      const people = await getPeople();
+      const response = await getPeople();
+      const people = response.data;
       setPeopleList(people);
     })();
   }, []);

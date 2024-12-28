@@ -11,6 +11,7 @@ import EditPeoplePage from "./pages/people/EditPeoplePage.tsx";
 import ServicePage from "./pages/service/ServicePage.tsx";
 import AddServicePage from "./pages/service/AddServicePage.tsx";
 import { Toaster } from "./components/ui/toaster.tsx";
+import EditServicePage from "./pages/service/EditServicePage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="service">
               <Route index element={<ServicePage />} />
               <Route path="new" element={<AddServicePage />} />
+              <Route path=":serviceId/edit" element={<EditServicePage />} />
             </Route>
           </Route>
         </Routes>

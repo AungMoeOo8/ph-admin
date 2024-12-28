@@ -13,14 +13,14 @@ export type PersonProps = {
 
 export async function getPeople() {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/people`)
-    const data = await res.json() as PersonProps[];
+    const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps[] };
 
     return data
 }
 
 export async function getPersonById(id: string) {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/people/${id}`)
-    const data = await res.json() as PersonProps;
+    const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
 
     return data
 }
@@ -31,7 +31,7 @@ export async function createPerson(person: PersonProps) {
         body: JSON.stringify(person),
         headers: { "Content-Type": "application/json" }
     })
-    const data = await res.json() as PersonProps;
+    const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
 
     return data;
 }
@@ -42,14 +42,14 @@ export async function updatePerson(id: string, person: PersonProps) {
         body: JSON.stringify(person),
         headers: { "Content-Type": "application/json" }
     })
-    const data = await res.json() as PersonProps;
+    const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
 
     return data;
 }
 
 export async function deletePerson(id: string) {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/people/${id}`, { method: "DELETE" })
-    const data = await res.json() as PersonProps;
+    const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
 
     return data;
 }

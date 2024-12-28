@@ -1,4 +1,6 @@
+import { toaster } from "@/components/ui/toaster";
 import {
+  deleteService,
   getServices,
   ServiceProps,
 } from "@/features/wordpress/service.service";
@@ -23,6 +25,16 @@ export default function ServicePage() {
       setServiceList(services.data);
     })();
   }, []);
+
+  const handleDeleteServiceBtn = async (id: string) => {
+    const response = await deleteService(id);
+    toaster.create({
+      type: response.isSuccess ? "success" : "error",
+      description: response.isSuccess
+        ? "Deleting successful."
+        : "Deleting failed.",
+    });
+  };
 
   return (
     <Stack gap="10" w={"full"}>
@@ -61,11 +73,14 @@ export default function ServicePage() {
               </Table.Cell>
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
                 <IconButton asChild colorPalette={"cyan"}>
-                  <Link to={`/admin/people/${service.id}/edit`}>
+                  <Link to={`/admin/service/${service.id}/edit`}>
                     <LuPencil />
                   </Link>
                 </IconButton>
-                <IconButton colorPalette={"red"} onClick={async () => {}}>
+                <IconButton
+                  colorPalette={"red"}
+                  onClick={async () => await handleDeleteServiceBtn(service.id)}
+                >
                   <LuTrash />
                 </IconButton>
               </Table.Cell>
