@@ -76,7 +76,7 @@ export default function PeoplePage() {
 
               <Table.Cell>
                 <Flex gapX={2} fontSize={"sm"} w="fit-content">
-                  <For each={person.roles.slice(0, 2)}>
+                  <For each={person.roles}>
                     {(role, index) => (
                       <Text key={index} display={"inline"}>
                         {role}

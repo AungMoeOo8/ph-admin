@@ -15,6 +15,7 @@ import EditServicePage from "./pages/service/EditServicePage.tsx";
 import CoursePage from "./pages/course/CoursePage.tsx";
 import AddCoursePage from "./pages/course/AddCoursePage.tsx";
 import EditCoursePage from "./pages/course/EditCoursePage.tsx";
+import AddActivityPage from "./pages/activity/AddActivityPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -37,6 +38,11 @@ createRoot(document.getElementById("root")!).render(
               <Route index element={<CoursePage />} />
               <Route path="new" element={<AddCoursePage />} />
               <Route path=":courseId/edit" element={<EditCoursePage />} />
+            </Route>
+            <Route path="activity">
+              <Route index element={<CoursePage />} />
+              <Route path="new" element={<AddActivityPage />} />
+              <Route path=":activityId/edit" element={<EditCoursePage />} />
             </Route>
           </Route>
         </Routes>

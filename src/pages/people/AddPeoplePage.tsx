@@ -1,7 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import {
   Box,
   Button,
@@ -22,6 +22,14 @@ import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { createPerson, PersonProps } from "@/features/wordpress/people.service";
+import {
+  FileUploadList,
+  FileUploadRoot,
+  FileUploadTrigger,
+} from "@/components/ui/file-upload";
+import { LuUpload } from "react-icons/lu";
+import { uploadFile } from "@/features/wordpress/upload.service";
+import { toaster } from "@/components/ui/toaster";
 
 const positons = createListCollection({
   items: [
@@ -31,10 +39,9 @@ const positons = createListCollection({
 });
 
 export default function AddPeoplePage() {
-
   const navigate = useNavigate();
 
-  const { register, handleSubmit, watch, control, getValues, setValue } =
+  const { register, handleSubmit, control, getValues, setValue } =
     useForm<PersonProps>({
       defaultValues: {
         id: "",
@@ -44,15 +51,26 @@ export default function AddPeoplePage() {
         image: "",
         biography: "",
         visibility: false,
-        indexNumber: 0
+        indexNumber: 0,
       },
     });
 
   const [inputValue, setInputValue] = useState("");
+  const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  const handleSaveBtn : SubmitHandler<PersonProps> = async (person) => {
+  const handleSaveBtn: SubmitHandler<PersonProps> = async (person) => {
+    const uploadResponse = await uploadFile(uploadImage[0]);
+    if (!uploadResponse.isSuccess) {
+      toaster.create({
+        type: "error",
+        description: "Image upload failed.",
+      });
+      return;
+    }
+
     person.id = uuidv4();
-    await createPerson(person)
+    person.image = uploadResponse.url;
+    await createPerson(person);
 
     navigate("/admin/people", { replace: true });
   };
@@ -77,7 +95,6 @@ export default function AddPeoplePage() {
         <Heading size={"2xl"}>Create new person</Heading>
         <Flex gap={4}>
           <Fieldset.Content>
-
             <Field label="Name" required>
               <Input {...register("name")} />
             </Field>
@@ -162,11 +179,27 @@ export default function AddPeoplePage() {
                 </Field>
               )}
             />
-            
           </Fieldset.Content>
 
           <Fieldset.Content marginTop={0}>
             <Image
+              src={
+                uploadImage.length <= 0
+                  ? ""
+                  : URL.createObjectURL(uploadImage![0])
+              }
+              objectFit={"contain"}
+              aspectRatio={"golden"}
+            />
+            <FileUploadRoot onFileAccept={(e) => setUploadImage(e.files)}>
+              <FileUploadTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <LuUpload /> Upload file
+                </Button>
+              </FileUploadTrigger>
+              <FileUploadList />
+            </FileUploadRoot>
+            {/* <Image
               src={watch("image")}
               objectFit={"contain"}
               aspectRatio={"golden"}
@@ -176,7 +209,7 @@ export default function AddPeoplePage() {
                 placeholder="https://example.com/images/image.jpg"
                 {...register("image")}
               />
-            </Field>
+            </Field> */}
           </Fieldset.Content>
         </Flex>
 
