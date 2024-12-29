@@ -5,7 +5,7 @@ export type CourseProps = {
     title: string,
     duration: string,
     instructor: string,
-    gustLecturer: string,
+    guestLecturer: string,
     outlines: string[],
     visibility: boolean,
     indexNumber: number,

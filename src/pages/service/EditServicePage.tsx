@@ -352,7 +352,7 @@ export default function EditPeoplePage() {
         <Heading size={"2xl"}>Fees</Heading>
         <FeesEditor control={control} />
 
-        <Button onClick={handleSubmit(handleSaveBtn)}>Save</Button>
+        <Button onClick={handleSubmit(handleSaveBtn)}>Save changes</Button>
       </Fieldset.Root>
     </Box>
   );

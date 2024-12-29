@@ -2,13 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { getPersonById, PersonProps, updatePerson } from "@/features/wordpress/people.service";
+import {
+  getPersonById,
+  PersonProps,
+  updatePerson,
+} from "@/features/wordpress/people.service";
 
 import {
   Box,
   createListCollection,
   Fieldset,
   Flex,
+  For,
   Heading,
   Image,
   Input,
@@ -44,11 +49,11 @@ export default function EditPeoplePage() {
         image: "",
         biography: "",
         visibility: false,
-        indexNumber: 0
+        indexNumber: 0,
       } as PersonProps,
     });
 
-    const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -57,7 +62,7 @@ export default function EditPeoplePage() {
       setValue("id", person.id);
       setValue("name", person.name);
       setValue("position", person.position);
-      setValue("roles", person.roles);
+      setValue("roles", person.roles ? person.roles : []);
       setValue("image", person.image);
       setValue("biography", person.biography);
       setValue("visibility", person.visibility);
@@ -66,7 +71,6 @@ export default function EditPeoplePage() {
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
     await updatePerson(person.id, person);
-
     navigate("/admin/people", { replace: true });
   };
 
@@ -90,7 +94,6 @@ export default function EditPeoplePage() {
         <Heading size="2xl">Edit person</Heading>
         <Flex gap={4}>
           <Fieldset.Content>
-
             <Field label="Name">
               <Input {...register("name")} />
             </Field>
@@ -124,26 +127,28 @@ export default function EditPeoplePage() {
                 )}
               />
             </Field>
-            
+
             <Field label="Roles">
               <Controller
                 name="roles"
                 control={control}
                 render={({ field }) => (
                   <Box>
-                    {field.value.map((role, index) => (
-                      <Tag
-                        key={index}
-                        size="lg"
-                        colorScheme="blue"
-                        borderRadius="full"
-                        m={1}
-                        closable
-                        onClick={() => removeRole(role)}
-                      >
-                        {role}
-                      </Tag>
-                    ))}
+                    <For each={field.value}>
+                      {(role, index) => (
+                        <Tag
+                          key={index}
+                          size="lg"
+                          colorScheme="blue"
+                          borderRadius="full"
+                          m={1}
+                          closable
+                          onClick={() => removeRole(role)}
+                        >
+                          {role}
+                        </Tag>
+                      )}
+                    </For>
                   </Box>
                 )}
               />
@@ -175,7 +180,6 @@ export default function EditPeoplePage() {
                 </Field>
               )}
             />
-            
           </Fieldset.Content>
 
           <Fieldset.Content marginTop={0}>
@@ -197,7 +201,7 @@ export default function EditPeoplePage() {
           <Textarea rows={5} {...register("biography")} />
         </Field>
 
-        <Button onClick={handleSubmit(savePerson)}>Save</Button>
+        <Button onClick={handleSubmit(savePerson)}>Save changes</Button>
       </Fieldset.Root>
     </Box>
   );

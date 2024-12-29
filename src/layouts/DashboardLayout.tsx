@@ -16,14 +16,14 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router";
-import { LuLogOut, LuMenu } from "react-icons/lu";
+import { LuMenu } from "react-icons/lu";
 import { signOut } from "firebase/auth";
 import { auth } from "@/features/firebase/firebaseConfig";
 
 const navLinks = [
   { name: "People", to: "/admin/people" },
   { name: "Service", to: "/admin/service" },
-  { name: "Academy", to: "/admin/academy" },
+  { name: "Course", to: "/admin/course" },
   { name: "Activity", to: "/admin/activity" },
 ];
 

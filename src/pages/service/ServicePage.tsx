@@ -34,6 +34,10 @@ export default function ServicePage() {
         ? "Deleting successful."
         : "Deleting failed.",
     });
+
+    if (response.isSuccess) {
+      setServiceList(serviceList.filter((service) => service.id != id));
+    }
   };
 
   return (

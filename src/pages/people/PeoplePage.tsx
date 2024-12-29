@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Flex,
+  For,
   IconButton,
   Stack,
   Table,
@@ -29,11 +30,15 @@ export default function PeoplePage() {
   }, []);
 
   async function handleDeleteBtn(id: string) {
-    await deletePerson(id);
+    const response = await deletePerson(id);
     toaster.create({
       type: "success",
       description: "Deleting successful.",
     });
+
+    if (response.isSuccess) {
+      setPeopleList(peopleList.filter((person) => person.id != id));
+    }
   }
 
   return (
@@ -71,9 +76,13 @@ export default function PeoplePage() {
 
               <Table.Cell>
                 <Flex gapX={2} fontSize={"sm"} w="fit-content">
-                  {person.roles.slice(0, 2).map((role) => (
-                    <Text display={"inline"}>{role}</Text>
-                  ))}
+                  <For each={person.roles.slice(0, 2)}>
+                    {(role, index) => (
+                      <Text key={index} display={"inline"}>
+                        {role}
+                      </Text>
+                    )}
+                  </For>
                 </Flex>
               </Table.Cell>
 
