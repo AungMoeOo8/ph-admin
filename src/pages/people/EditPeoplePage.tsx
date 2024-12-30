@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/file-upload";
 import { InputGroup } from "@/components/ui/input-group";
 import { Tag } from "@/components/ui/tag";
+import { toaster } from "@/components/ui/toaster";
 import {
   getPersonById,
   PersonProps,
   updatePerson,
 } from "@/features/wordpress/people.service";
+import { deleteFile, uploadFile } from "@/features/wordpress/upload.service";
 
 import {
   Box,
@@ -79,6 +81,32 @@ export default function EditPeoplePage() {
   }, []);
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
+    if (uploadImage.length > 0) {
+      const imageUrl = person.image.slice(person.image.indexOf("/2024"));
+      const deleteResponse = await deleteFile(imageUrl);
+
+      if (!deleteResponse.isSuccess) {
+        toaster.create({
+          type: "error",
+          description: deleteResponse.message,
+        });
+        return;
+      }
+    }
+
+    if (uploadImage.length > 0) {
+      const uploadResponse = await uploadFile(uploadImage[0]);
+      if (!uploadResponse.isSuccess) {
+        toaster.create({
+          type: "error",
+          description: uploadResponse.message,
+        });
+        return;
+      }
+
+      person.image = uploadResponse.url;
+    }
+
     await updatePerson(person.id, person);
     navigate("/admin/people", { replace: true });
   };

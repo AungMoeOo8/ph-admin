@@ -59,17 +59,20 @@ export default function AddPeoplePage() {
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
   const handleSaveBtn: SubmitHandler<PersonProps> = async (person) => {
-    const uploadResponse = await uploadFile(uploadImage[0]);
-    if (!uploadResponse.isSuccess) {
-      toaster.create({
-        type: "error",
-        description: "Image upload failed.",
-      });
-      return;
+    if (uploadImage.length > 0) {
+      const uploadResponse = await uploadFile(uploadImage[0]);
+      if (!uploadResponse.isSuccess) {
+        toaster.create({
+          type: "error",
+          description: "Image upload failed.",
+        });
+        return;
+      }
+
+      person.image = uploadResponse.url;
     }
 
     person.id = uuidv4();
-    person.image = uploadResponse.url;
     await createPerson(person);
 
     navigate("/admin/people", { replace: true });
