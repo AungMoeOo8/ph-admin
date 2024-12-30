@@ -199,17 +199,6 @@ export default function AddPeoplePage() {
               </FileUploadTrigger>
               <FileUploadList />
             </FileUploadRoot>
-            {/* <Image
-              src={watch("image")}
-              objectFit={"contain"}
-              aspectRatio={"golden"}
-            />
-            <Field label="Image Url" required>
-              <Input
-                placeholder="https://example.com/images/image.jpg"
-                {...register("image")}
-              />
-            </Field> */}
           </Fieldset.Content>
         </Flex>
 

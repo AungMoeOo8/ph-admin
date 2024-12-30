@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CloseButton } from "@/components/ui/close-button";
 import { Field } from "@/components/ui/field";
+import {
+  FileInput,
+  FileUploadClearTrigger,
+  FileUploadRoot,
+} from "@/components/ui/file-upload";
+import { InputGroup } from "@/components/ui/input-group";
 import { Tag } from "@/components/ui/tag";
 import {
   getPersonById,
@@ -24,8 +31,9 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { LuFileUp } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router";
 
 const positons = createListCollection({
@@ -54,6 +62,7 @@ export default function EditPeoplePage() {
     });
 
   const [inputValue, setInputValue] = useState("");
+  const [uploadImage, setUploadImage] = useState<File[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +96,13 @@ export default function EditPeoplePage() {
     const roles = getValues("roles").filter((r) => r !== role);
     setValue("roles", roles);
   };
+
+  const previewImage = useMemo(() => {
+    if (uploadImage.length > 0) {
+      return URL.createObjectURL(uploadImage![0]);
+    }
+    return watch("image");
+  }, [uploadImage, watch("image")]);
 
   return (
     <Box>
@@ -184,16 +200,38 @@ export default function EditPeoplePage() {
 
           <Fieldset.Content marginTop={0}>
             <Image
-              src={watch("image")}
+              src={previewImage}
               objectFit={"contain"}
               aspectRatio={"golden"}
             />
-            <Field label="Image Url">
-              <Input
-                placeholder="https://example.com/images/image.jpg"
-                {...register("image")}
-              />
-            </Field>
+            <FileUploadRoot
+              onFileChange={(e) => {
+                if (e.acceptedFiles.length > 0)
+                  return setUploadImage(e.acceptedFiles);
+
+                return setUploadImage([]);
+              }}
+            >
+              <InputGroup
+                w="full"
+                startElement={<LuFileUp />}
+                endElement={
+                  <FileUploadClearTrigger asChild>
+                    <CloseButton
+                      me="-1"
+                      size="xs"
+                      variant="plain"
+                      focusVisibleRing="inside"
+                      focusRingWidth="2px"
+                      pointerEvents="auto"
+                      color="fg.subtle"
+                    />
+                  </FileUploadClearTrigger>
+                }
+              >
+                <FileInput />
+              </InputGroup>
+            </FileUploadRoot>
           </Fieldset.Content>
         </Flex>
 
