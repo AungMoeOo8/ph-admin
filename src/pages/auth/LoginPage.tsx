@@ -1,8 +1,6 @@
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { auth } from "@/features/firebase/firebaseConfig";
 import { Button, Center, Fieldset, Input } from "@chakra-ui/react";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useReducer } from "react";
 
 type CredentialProps = {
@@ -46,14 +44,7 @@ export default function LoginPage() {
     });
   }
 
-  function handleLogin() {
-    signInWithEmailAndPassword(auth, state.email, state.password).then(
-      (userCredential) => {
-        const user = userCredential.user;
-        console.log(user);
-      }
-    );
-  }
+  function handleLogin() {}
 
   return (
     <Center h={"dvh"} p={4}>
