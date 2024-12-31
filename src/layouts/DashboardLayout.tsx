@@ -17,8 +17,6 @@ import {
 } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router";
 import { LuMenu } from "react-icons/lu";
-import { signOut } from "firebase/auth";
-import { auth } from "@/features/firebase/firebaseConfig";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people" },
@@ -29,7 +27,6 @@ const navLinks = [
 
 export default function DashboardLayout() {
   async function handleLogout() {
-    await signOut(auth);
   }
 
   return (
