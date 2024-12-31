@@ -16,33 +16,36 @@ import CoursePage from "./pages/course/CoursePage.tsx";
 import AddCoursePage from "./pages/course/AddCoursePage.tsx";
 import EditCoursePage from "./pages/course/EditCoursePage.tsx";
 import AddActivityPage from "./pages/activity/AddActivityPage.tsx";
+import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="dashboard" element={<DashboardLayout />}>
-            <Route path="people">
-              <Route index element={<PeoplePage />} />
-              <Route path="new" element={<AddPeoplePage />} />
-              <Route path=":personId/edit" element={<EditPeoplePage />} />
-            </Route>
-            <Route path="service">
-              <Route index element={<ServicePage />} />
-              <Route path="new" element={<AddServicePage />} />
-              <Route path=":serviceId/edit" element={<EditServicePage />} />
-            </Route>
-            <Route path="course">
-              <Route index element={<CoursePage />} />
-              <Route path="new" element={<AddCoursePage />} />
-              <Route path=":courseId/edit" element={<EditCoursePage />} />
-            </Route>
-            <Route path="activity">
-              <Route index element={<CoursePage />} />
-              <Route path="new" element={<AddActivityPage />} />
-              <Route path=":activityId/edit" element={<EditCoursePage />} />
+          <Route path="/" element={<App />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="dashboard" element={<DashboardLayout />}>
+              <Route path="people">
+                <Route index element={<PeoplePage />} />
+                <Route path="new" element={<AddPeoplePage />} />
+                <Route path=":personId/edit" element={<EditPeoplePage />} />
+              </Route>
+              <Route path="service">
+                <Route index element={<ServicePage />} />
+                <Route path="new" element={<AddServicePage />} />
+                <Route path=":serviceId/edit" element={<EditServicePage />} />
+              </Route>
+              <Route path="course">
+                <Route index element={<CoursePage />} />
+                <Route path="new" element={<AddCoursePage />} />
+                <Route path=":courseId/edit" element={<EditCoursePage />} />
+              </Route>
+              <Route path="activity">
+                <Route index element={<CoursePage />} />
+                <Route path="new" element={<AddActivityPage />} />
+                <Route path=":activityId/edit" element={<EditCoursePage />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

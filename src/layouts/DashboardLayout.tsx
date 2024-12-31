@@ -31,6 +31,7 @@ export default function DashboardLayout() {
   async function handleLogout() {
     await signOut(auth);
   }
+
   return (
     <DrawerRoot placement={"start"}>
       <DrawerBackdrop />
@@ -52,9 +53,7 @@ export default function DashboardLayout() {
               PH Admin
             </Heading>
           </Flex>
-          <Button onClick={handleLogout}>
-            Logout
-          </Button>
+          <Button onClick={handleLogout}>Logout</Button>
         </Container>
       </Box>
       <Container px={0} as={Flex}>
