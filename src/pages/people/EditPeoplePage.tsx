@@ -8,6 +8,7 @@ import {
   FileUploadRoot,
 } from "@/components/ui/file-upload";
 import { InputGroup } from "@/components/ui/input-group";
+import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
 import {
@@ -77,6 +78,7 @@ export default function EditPeoplePage() {
       setValue("image", person.image);
       setValue("biography", person.biography);
       setValue("visibility", person.visibility);
+      setValue("indexNumber", person.indexNumber);
     })();
   }, []);
 
@@ -208,6 +210,12 @@ export default function EditPeoplePage() {
                   }
                 }}
               />
+            </Field>
+
+            <Field label="Order No.">
+              <NumberInputRoot>
+                <NumberInputField {...register("indexNumber")} />
+              </NumberInputRoot>
             </Field>
 
             <Controller

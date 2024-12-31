@@ -86,6 +86,7 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
       feeInputs.amount !== 0 ||
       feeInputs.description !== ""
     ) {
+      setEditingState({ isEditing: true, index });
       setIsDialogOpen(true);
     } else {
       setEditingState({ isEditing: true, index });
@@ -253,8 +254,8 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
           </DialogHeader>
           <DialogBody>
             <p>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our systems.
+              This action cannot be undone. This will remove your current fee
+              infomations.
             </p>
           </DialogBody>
           <DialogFooter>
@@ -263,9 +264,16 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
                 Cancel
               </Button>
             </DialogActionTrigger>
-            <Button colorPalette="red">Delete</Button>
+            <Button
+              colorPalette="red"
+              onClick={() => {
+                syncFeeInputs(editingState.index);
+                setIsDialogOpen(false);
+              }}
+            >
+              Remove
+            </Button>
           </DialogFooter>
-          {/* <DialogCloseTrigger /> */}
         </DialogContent>
       </DialogRoot>
     </>
@@ -307,8 +315,6 @@ export default function EditPeoplePage() {
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
     await updateService(service.id, service);
 
-    console.log({ service: service });
-
     navigate("/admin/service", { replace: true });
   };
 
@@ -327,6 +333,12 @@ export default function EditPeoplePage() {
 
           <Field required label="Description">
             <Textarea rows={5} {...register("description")} />
+          </Field>
+
+          <Field label="Order No.">
+            <NumberInputRoot>
+              <NumberInputField {...register("indexNumber")} />
+            </NumberInputRoot>
           </Field>
 
           <Controller

@@ -2,18 +2,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
 import { v4 as uuidv4 } from "uuid";
-import {
-  Box,
-  Button,
-  Fieldset,
-  Flex,
-  Heading,
-  Input,
-} from "@chakra-ui/react";
+import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { createCourse, CourseProps } from "@/features/wordpress/course.service";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "@/components/ui/number-input";
 
 export default function AddCoursePage() {
   const navigate = useNavigate();
@@ -75,6 +72,12 @@ export default function AddCoursePage() {
 
             <Field label="Guest Lecturer">
               <Input {...register("guestLecturer")} />
+            </Field>
+
+            <Field label="Order No.">
+              <NumberInputRoot>
+                <NumberInputField {...register("indexNumber")} />
+              </NumberInputRoot>
             </Field>
 
             <Controller

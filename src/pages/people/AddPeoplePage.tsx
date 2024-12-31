@@ -30,6 +30,10 @@ import {
 import { LuUpload } from "react-icons/lu";
 import { uploadFile } from "@/features/wordpress/upload.service";
 import { toaster } from "@/components/ui/toaster";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "@/components/ui/number-input";
 
 const positons = createListCollection({
   items: [
@@ -166,6 +170,12 @@ export default function AddPeoplePage() {
                   }
                 }}
               />
+            </Field>
+
+            <Field label="Order No.">
+              <NumberInputRoot>
+                <NumberInputField {...register("indexNumber")} />
+              </NumberInputRoot>
             </Field>
 
             <Controller

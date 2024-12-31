@@ -10,6 +10,7 @@ import {
   updateCourse,
   CourseProps,
 } from "@/features/wordpress/course.service";
+import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();
@@ -81,6 +82,12 @@ export default function EditCoursePage() {
 
             <Field label="Guest Lecturer">
               <Input {...register("guestLecturer")} />
+            </Field>
+
+            <Field label="Order No.">
+              <NumberInputRoot>
+                <NumberInputField {...register("indexNumber")} />
+              </NumberInputRoot>
             </Field>
 
             <Controller
