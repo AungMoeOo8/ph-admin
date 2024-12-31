@@ -35,7 +35,7 @@ export default function AddCoursePage() {
     course.id = uuidv4();
     await createCourse(course);
 
-    navigate("/admin/course", { replace: true });
+    navigate("/dashboard/course", { replace: true });
   };
 
   const addOutline = () => {

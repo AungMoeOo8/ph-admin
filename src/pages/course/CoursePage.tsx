@@ -44,7 +44,7 @@ export default function CoursePage() {
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/admin/course/new"}>
+          <Link to={"/dashboard/course/new"}>
             <LuPlus /> Add
           </Link>
         </Button>
@@ -77,7 +77,7 @@ export default function CoursePage() {
               </Table.Cell>
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
                 <IconButton asChild colorPalette={"cyan"}>
-                  <Link to={`/admin/course/${course.id}/edit`}>
+                  <Link to={`/dashboard/course/${course.id}/edit`}>
                     <LuPencil />
                   </Link>
                 </IconButton>

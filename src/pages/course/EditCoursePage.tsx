@@ -45,7 +45,7 @@ export default function EditCoursePage() {
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
     if (!courseId) return;
     await updateCourse(courseId, course);
-    navigate("/admin/course", { replace: true });
+    navigate("/dashboard/course", { replace: true });
   };
 
   const addOutline = () => {

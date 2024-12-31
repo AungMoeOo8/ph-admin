@@ -315,7 +315,7 @@ export default function EditPeoplePage() {
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
     await updateService(service.id, service);
 
-    navigate("/admin/service", { replace: true });
+    navigate("/dashboard/service", { replace: true });
   };
 
   return (

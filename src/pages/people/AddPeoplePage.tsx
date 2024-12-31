@@ -79,7 +79,7 @@ export default function AddPeoplePage() {
     person.id = uuidv4();
     await createPerson(person);
 
-    navigate("/admin/people", { replace: true });
+    navigate("/dashboard/people", { replace: true });
   };
 
   const addRole = () => {

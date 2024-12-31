@@ -110,7 +110,7 @@ export default function EditPeoplePage() {
     }
 
     await updatePerson(person.id, person);
-    navigate("/admin/people", { replace: true });
+    navigate("/dashboard/people", { replace: true });
   };
 
   const addRole = () => {

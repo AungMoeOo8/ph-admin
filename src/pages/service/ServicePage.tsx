@@ -44,7 +44,7 @@ export default function ServicePage() {
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/admin/service/new"}>
+          <Link to={"/dashboard/service/new"}>
             <LuPlus /> Add
           </Link>
         </Button>
@@ -77,7 +77,7 @@ export default function ServicePage() {
               </Table.Cell>
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
                 <IconButton asChild colorPalette={"cyan"}>
-                  <Link to={`/admin/service/${service.id}/edit`}>
+                  <Link to={`/dashboard/service/${service.id}/edit`}>
                     <LuPencil />
                   </Link>
                 </IconButton>

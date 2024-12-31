@@ -45,7 +45,7 @@ export default function PeoplePage() {
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/admin/people/new"}>
+          <Link to={"/dashboard/people/new"}>
             <LuPlus /> Add
           </Link>
         </Button>
@@ -97,7 +97,7 @@ export default function PeoplePage() {
 
               <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
                 <IconButton asChild colorPalette={"cyan"}>
-                  <Link to={`/admin/people/${person.id}/edit`}>
+                  <Link to={`/dashboard/people/${person.id}/edit`}>
                     <LuPencil />
                   </Link>
                 </IconButton>

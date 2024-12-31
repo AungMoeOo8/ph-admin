@@ -299,7 +299,7 @@ export default function AddServicePage() {
     service.id = uuidv4();
     await createService(service);
 
-    navigate("/admin/service", { replace: true });
+    navigate("/dashboard/service", { replace: true });
   };
 
   return (

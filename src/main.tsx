@@ -23,7 +23,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="admin" element={<DashboardLayout />}>
+          <Route path="dashboard" element={<DashboardLayout />}>
             <Route path="people">
               <Route index element={<PeoplePage />} />
               <Route path="new" element={<AddPeoplePage />} />

@@ -21,10 +21,10 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/features/firebase/firebaseConfig";
 
 const navLinks = [
-  { name: "People", to: "/admin/people" },
-  { name: "Service", to: "/admin/service" },
-  { name: "Course", to: "/admin/course" },
-  { name: "Activity", to: "/admin/activity" },
+  { name: "People", to: "/dashboard/people" },
+  { name: "Service", to: "/dashboard/service" },
+  { name: "Course", to: "/dashboard/course" },
+  { name: "Activity", to: "/dashboard/activity" },
 ];
 
 export default function DashboardLayout() {
