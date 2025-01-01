@@ -17,10 +17,11 @@ import AddCoursePage from "./pages/course/AddCoursePage.tsx";
 import EditCoursePage from "./pages/course/EditCoursePage.tsx";
 import AddActivityPage from "./pages/activity/AddActivityPage.tsx";
 import App from "./App.tsx";
+import ActivityPage from "./pages/activity/ActivityPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Provider>
+    <Provider forcedTheme="light">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />}>
@@ -42,7 +43,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path=":courseId/edit" element={<EditCoursePage />} />
               </Route>
               <Route path="activity">
-                <Route index element={<CoursePage />} />
+                <Route index element={<ActivityPage />} />
                 <Route path="new" element={<AddActivityPage />} />
                 <Route path=":activityId/edit" element={<EditCoursePage />} />
               </Route>

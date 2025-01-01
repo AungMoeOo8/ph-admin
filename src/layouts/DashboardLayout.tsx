@@ -26,8 +26,7 @@ const navLinks = [
 ];
 
 export default function DashboardLayout() {
-  async function handleLogout() {
-  }
+  async function handleLogout() {}
 
   return (
     <DrawerRoot placement={"start"}>
