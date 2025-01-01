@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { NumberInputField } from "@/components/ui/number-input";
+import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 import {
   createService,
   ServiceProps,
@@ -18,7 +18,6 @@ import {
   MenuItem,
   MenuRoot,
   MenuTrigger,
-  NumberInputRoot,
   SimpleGrid,
   Text,
   Textarea,

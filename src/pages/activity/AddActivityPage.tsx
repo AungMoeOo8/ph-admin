@@ -15,6 +15,7 @@ import {
   createActivity,
   ActivityProps,
 } from "@/features/wordpress/activity.service";
+import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 
 export default function AddActivityPage() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function AddActivityPage() {
   return (
     <Box>
       <Fieldset.Root>
-        <Heading size={"2xl"}>Add Activity Image</Heading>
+        <Heading size={"2xl"}>Add activity image</Heading>
         <Flex gap={4}>
           <Fieldset.Content>
             <Field label="Image URL" required>
@@ -48,11 +49,10 @@ export default function AddActivityPage() {
               />
             </Field>
 
-            <Field label="Index Number" required>
-              <Input
-                type="number"
-                {...register("indexNumber", { valueAsNumber: true })}
-              />
+            <Field label="Order No." required>
+              <NumberInputRoot>
+                <NumberInputField {...register("indexNumber")}/>
+              </NumberInputRoot>
             </Field>
 
             <Controller
