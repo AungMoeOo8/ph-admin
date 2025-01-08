@@ -16,13 +16,13 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router";
-import { LuMenu } from "react-icons/lu";
+import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
 
 const navLinks = [
-  { name: "People", to: "/dashboard/people" },
-  { name: "Service", to: "/dashboard/service" },
-  { name: "Course", to: "/dashboard/course" },
-  { name: "Activity", to: "/dashboard/activity" },
+  { name: "People", to: "/dashboard/people", icon: LuUsers },
+  { name: "Service", to: "/dashboard/service", icon: LuList },
+  { name: "Course", to: "/dashboard/course", icon: LuLibrary },
+  { name: "Activity", to: "/dashboard/activity", icon: LuImages },
 ];
 
 export default function DashboardLayout() {
@@ -65,14 +65,15 @@ export default function DashboardLayout() {
                 {({ isActive }) => (
                   <Box
                     p={3}
-                    fontSize={"lg"}
-                    fontWeight={"medium"}
                     display={"flex"}
+                    alignItems={"center"}
+                    gapX={4}
                     rounded={"md"}
                     _hover={isActive ? undefined : { bg: "bg.muted" }}
                     color={isActive ? "white" : "black"}
                     bg={isActive ? "gray.solid" : "white"}
                   >
+                    {link.icon({ size: 18 })}
                     {link.name}
                   </Box>
                 )}
