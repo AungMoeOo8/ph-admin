@@ -2,43 +2,55 @@ import { toaster } from "@/components/ui/toaster";
 import {
   deleteService,
   getServices,
-  ServiceProps,
 } from "@/features/wordpress/service.service";
+import { queryClient } from "@/main";
 import {
   Badge,
+  Box,
   Button,
   Flex,
   IconButton,
   Stack,
   Table,
+  Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function ServicePage() {
-  const [serviceList, setServiceList] = useState<ServiceProps[]>([]);
+  // const [serviceList, setServiceList] = useState<ServiceProps[]>([]);
 
-  useEffect(() => {
-    (async () => {
-      const services = await getServices();
-      setServiceList(services.data);
-    })();
-  }, []);
+  const { data, isPending } = useQuery({
+    queryKey: ["services"],
+    queryFn: async () => {
+      const response = await getServices();
+      if (!response.isSuccess) throw new Error(response.message);
+      return response.data;
+    },
+  });
 
-  const handleDeleteServiceBtn = async (id: string) => {
-    const response = await deleteService(id);
-    toaster.create({
-      type: response.isSuccess ? "success" : "error",
-      description: response.isSuccess
-        ? "Deleting successful."
-        : "Deleting failed.",
-    });
+  const mutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await deleteService(id);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
 
-    if (response.isSuccess) {
-      setServiceList(serviceList.filter((service) => service.id != id));
-    }
-  };
+    onSuccess: (_, id) => {
+      toaster.create({
+        type: "success",
+        description: "Deleting successful.",
+      });
+      queryClient.setQueryData(["services"], () =>
+        data?.filter((x) => x.id !== id)
+      );
+    },
+  });
+
+  async function handleDeleteBtn(id: string) {
+    mutation.mutate(id);
+  }
 
   return (
     <Stack gap="10" w={"full"}>
@@ -49,49 +61,56 @@ export default function ServicePage() {
           </Link>
         </Button>
       </Flex>
-      <Table.Root size={"lg"}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader>No.</Table.ColumnHeader>
-            <Table.ColumnHeader>Name</Table.ColumnHeader>
-            <Table.ColumnHeader>Provider</Table.ColumnHeader>
-            <Table.ColumnHeader>Status</Table.ColumnHeader>
-            <Table.ColumnHeader textAlign={"center"}>
-              Actions
-            </Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {serviceList.map((service, index) => (
-            <Table.Row key={service.id}>
-              <Table.Cell>{index + 1}</Table.Cell>
-              <Table.Cell>{service.name}</Table.Cell>
-              <Table.Cell>{service.provider}</Table.Cell>
-              <Table.Cell>
-                <Badge
-                  size={"lg"}
-                  colorPalette={service.visibility ? "green" : "orange"}
-                >
-                  {service.visibility ? "Public" : "Private"}
-                </Badge>
-              </Table.Cell>
-              <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
-                <IconButton asChild colorPalette={"cyan"}>
-                  <Link to={`/dashboard/service/${service.id}/edit`}>
-                    <LuPencil />
-                  </Link>
-                </IconButton>
-                <IconButton
-                  colorPalette={"red"}
-                  onClick={async () => await handleDeleteServiceBtn(service.id)}
-                >
-                  <LuTrash />
-                </IconButton>
-              </Table.Cell>
+      {isPending && (
+        <Box display={"grid"} placeContent={"center"}>
+          <Text>Loading...</Text>
+        </Box>
+      )}
+      {data != undefined && (
+        <Table.Root size={"lg"}>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>No.</Table.ColumnHeader>
+              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Provider</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign={"center"}>
+                Actions
+              </Table.ColumnHeader>
             </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
+          </Table.Header>
+          <Table.Body>
+            {data.map((service, index) => (
+              <Table.Row key={service.id}>
+                <Table.Cell>{index + 1}</Table.Cell>
+                <Table.Cell>{service.name}</Table.Cell>
+                <Table.Cell>{service.provider}</Table.Cell>
+                <Table.Cell>
+                  <Badge
+                    size={"lg"}
+                    colorPalette={service.visibility ? "green" : "orange"}
+                  >
+                    {service.visibility ? "Public" : "Private"}
+                  </Badge>
+                </Table.Cell>
+                <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
+                  <IconButton asChild colorPalette={"cyan"}>
+                    <Link to={`/dashboard/service/${service.id}/edit`}>
+                      <LuPencil />
+                    </Link>
+                  </IconButton>
+                  <IconButton
+                    colorPalette={"red"}
+                    onClick={async () => await handleDeleteBtn(service.id)}
+                  >
+                    <LuTrash />
+                  </IconButton>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      )}
     </Stack>
   );
 }
