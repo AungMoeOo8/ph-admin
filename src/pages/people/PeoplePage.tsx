@@ -17,7 +17,6 @@ import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function PeoplePage() {
-
   const { data, isPending } = useQuery({
     queryKey: ["people"],
     queryFn: async () => {
@@ -28,7 +27,6 @@ export default function PeoplePage() {
   });
 
   const mutation = useMutation({
-
     mutationFn: async (id: string) => {
       const response = await deletePerson(id);
       if (!response.isSuccess) throw new Error(response.message);
@@ -44,7 +42,6 @@ export default function PeoplePage() {
         data?.filter((x) => x.id !== id)
       );
     },
-
   });
 
   async function handleDeleteBtn(id: string) {
@@ -74,9 +71,7 @@ export default function PeoplePage() {
               <Table.ColumnHeader>Position</Table.ColumnHeader>
               <Table.ColumnHeader>Roles</Table.ColumnHeader>
               <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign={"center"}>
-                Actions
-              </Table.ColumnHeader>
+              <Table.ColumnHeader></Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>

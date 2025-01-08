@@ -19,8 +19,6 @@ import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function ServicePage() {
-  // const [serviceList, setServiceList] = useState<ServiceProps[]>([]);
-
   const { data, isPending } = useQuery({
     queryKey: ["services"],
     queryFn: async () => {
@@ -74,9 +72,7 @@ export default function ServicePage() {
               <Table.ColumnHeader>Name</Table.ColumnHeader>
               <Table.ColumnHeader>Provider</Table.ColumnHeader>
               <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign={"center"}>
-                Actions
-              </Table.ColumnHeader>
+              <Table.ColumnHeader></Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
