@@ -34,20 +34,26 @@ export default function ServicePage() {
       if (!response.isSuccess) throw new Error(response.message);
       return response;
     },
-
-    onSuccess: (_, id) => {
-      toaster.create({
-        type: "success",
-        description: "Deleting successful.",
-      });
-      queryClient.setQueryData(["services"], () =>
-        data?.filter((x) => x.id !== id)
-      );
-    },
   });
 
   async function handleDeleteBtn(id: string) {
-    mutation.mutate(id);
+    mutation.mutate(id, {
+      onSuccess: (_, id) => {
+        toaster.create({
+          type: "success",
+          description: "Deleting successful.",
+        });
+        queryClient.setQueryData(["services"], () =>
+          data?.filter((x) => x.id !== id)
+        );
+      },
+      onError: () => {
+        toaster.create({
+          type: "error",
+          description: "Deleting failed.",
+        });
+      },
+    });
   }
 
   return (

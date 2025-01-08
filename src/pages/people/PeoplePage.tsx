@@ -32,20 +32,26 @@ export default function PeoplePage() {
       if (!response.isSuccess) throw new Error(response.message);
       return response;
     },
-
-    onSuccess: (_, id) => {
-      toaster.create({
-        type: "success",
-        description: "Deleting successful.",
-      });
-      queryClient.setQueryData(["people"], () =>
-        data?.filter((x) => x.id !== id)
-      );
-    },
   });
 
   async function handleDeleteBtn(id: string) {
-    mutation.mutate(id);
+    mutation.mutate(id, {
+      onSuccess: (_, id) => {
+        toaster.create({
+          type: "success",
+          description: "Deleting successful.",
+        });
+        queryClient.setQueryData(["people"], () =>
+          data?.filter((x) => x.id !== id)
+        );
+      },
+      onError: () => {
+        toaster.create({
+          type: "error",
+          description: "Deleting failed.",
+        });
+      },
+    });
   }
 
   return (
@@ -75,54 +81,60 @@ export default function PeoplePage() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {data.map((person, index) => (
-              <Table.Row key={person.id}>
-                <Table.Cell>{index + 1}</Table.Cell>
+            {data
+              .sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1))
+              .map((person, index) => (
+                <Table.Row key={person.id}>
+                  <Table.Cell>{index + 1}</Table.Cell>
 
-                <Table.Cell>{person.name}</Table.Cell>
+                  <Table.Cell>{person.name}</Table.Cell>
 
-                <Table.Cell>
-                  {person.position == "PROFESSIONAL"
-                    ? "Professional"
-                    : "Member"}
-                </Table.Cell>
+                  <Table.Cell>
+                    {person.position == "PROFESSIONAL"
+                      ? "Professional"
+                      : "Member"}
+                  </Table.Cell>
 
-                <Table.Cell>
-                  <Flex gapX={2} fontSize={"sm"} w="fit-content">
-                    <For each={person.roles}>
-                      {(role, index) => (
-                        <Text key={index} display={"inline"}>
-                          {role}
-                        </Text>
-                      )}
-                    </For>
-                  </Flex>
-                </Table.Cell>
+                  <Table.Cell>
+                    <Flex gapX={2} fontSize={"sm"} w="fit-content">
+                      <For each={person.roles}>
+                        {(role, index) => (
+                          <Text key={index} display={"inline"}>
+                            {role},
+                          </Text>
+                        )}
+                      </For>
+                    </Flex>
+                  </Table.Cell>
 
-                <Table.Cell>
-                  <Badge
-                    size={"lg"}
-                    colorPalette={person.visibility ? "green" : "orange"}
+                  <Table.Cell>
+                    <Badge
+                      size={"lg"}
+                      colorPalette={person.visibility ? "green" : "orange"}
+                    >
+                      {person.visibility ? "Public" : "Private"}
+                    </Badge>
+                  </Table.Cell>
+
+                  <Table.Cell
+                    display={"flex"}
+                    justifyContent={"center"}
+                    gapX={2}
                   >
-                    {person.visibility ? "Public" : "Private"}
-                  </Badge>
-                </Table.Cell>
-
-                <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
-                  <IconButton asChild colorPalette={"cyan"}>
-                    <Link to={`/dashboard/people/${person.id}/edit`}>
-                      <LuPencil />
-                    </Link>
-                  </IconButton>
-                  <IconButton
-                    colorPalette={"red"}
-                    onClick={async () => await handleDeleteBtn(person.id)}
-                  >
-                    <LuTrash />
-                  </IconButton>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                    <IconButton asChild colorPalette={"cyan"}>
+                      <Link to={`/dashboard/people/${person.id}/edit`}>
+                        <LuPencil />
+                      </Link>
+                    </IconButton>
+                    <IconButton
+                      colorPalette={"red"}
+                      onClick={async () => await handleDeleteBtn(person.id)}
+                    >
+                      <LuTrash />
+                    </IconButton>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
           </Table.Body>
         </Table.Root>
       )}
