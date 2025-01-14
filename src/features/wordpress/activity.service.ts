@@ -2,14 +2,14 @@ const { VITE_WORDPRESS_DOMAIN } = import.meta.env
 
 export type ActivityProps = {
     id: string,
-    url: string,
+    imageUrl: string,
     visibility: boolean,
     indexNumber: number,
 }
 
 export async function getActivities() {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity`)
-    const data = await res.json() as { isSuccess: boolean, message: string, data: ActivityProps[] };
+    const data = await res.json() as { success: boolean, data: ActivityProps[] };
 
     return data
 }

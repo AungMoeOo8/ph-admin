@@ -30,7 +30,7 @@ export default function AddActivityPage() {
   const { register, handleSubmit, control, watch } = useForm<ActivityProps>({
     defaultValues: {
       id: "",
-      url: "",
+      imageUrl: "",
       visibility: false,
       indexNumber: 0,
     },
@@ -40,8 +40,8 @@ export default function AddActivityPage() {
     if (uploadImage.length > 0) {
       return URL.createObjectURL(uploadImage![0]);
     }
-    return watch("url");
-  }, [uploadImage, watch("url")]);
+    return watch("imageUrl");
+  }, [uploadImage, watch("imageUrl")]);
 
   const handleSaveBtn: SubmitHandler<ActivityProps> = async (activity) => {
     const uploadResponse = await uploadFile(uploadImage[0]);
@@ -54,12 +54,12 @@ export default function AddActivityPage() {
     }
 
     activity.id = uuidv4();
-    activity.url = uploadResponse.url;
+    activity.imageUrl = uploadResponse.url;
     const activityCreateResponse = await createActivity(activity);
     if (!activityCreateResponse.isSuccess) {
       toaster.create({
         type: "error",
-        description: uploadResponse.message,
+        description: activityCreateResponse.message,
       });
       return;
     }

@@ -24,7 +24,7 @@ export default function AddActivityPage() {
     useForm<ActivityProps>({
       defaultValues: {
         id: "",
-        url: "",
+        imageUrl: "",
         visibility: false,
         indexNumber: 0,
       },
@@ -45,7 +45,7 @@ export default function AddActivityPage() {
             <Field label="Image URL" required>
               <Input
                 placeholder="https://example.com/images/image.jpg"
-                {...register("url")}
+                {...register("imageUrl")}
               />
             </Field>
 

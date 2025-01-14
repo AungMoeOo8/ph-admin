@@ -1,34 +1,26 @@
+import { getActivities } from "@/features/wordpress/activity.service";
 import {
+  Box,
   Button,
   Flex,
   SimpleGrid,
   Stack,
+  Image,
+  Text,
 } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { LuPlus } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function ActivityPage() {
-  // const [activityList, setActivityList] = useState<ActivityProps[]>([]);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     const response = await getActivities();
-  //     const activities = response.data;
-  //     setActivityList(activities);
-  //   })();
-  // }, []);
-
-  // async function handleDeleteBtn(id: string) {
-  //   const response = await deletePerson(id);
-  //   toaster.create({
-  //     type: "success",
-  //     description: "Deleting successful.",
-  //   });
-
-  //   if (response.isSuccess) {
-  //     setActivityList(activityList.filter((activity) => activity.id != id));
-  //   }
-  // }
+  const { data, isPending } = useQuery({
+    queryKey: ["activities"],
+    queryFn: async () => {
+      const response = await getActivities();
+      if (!response.success) throw new Error("");
+      return response.data;
+    },
+  });
 
   return (
     <Stack gap="10" w={"full"}>
@@ -39,13 +31,20 @@ export default function ActivityPage() {
           </Link>
         </Button>
       </Flex>
-      <SimpleGrid>
-        {/* {activityList.map((activity) => (
-          <Box key={activity.id}>
-            <Image src={activity.url} />
-          </Box>
-        ))} */}
-      </SimpleGrid>
+      {isPending && (
+        <Box display={"grid"} placeContent={"center"}>
+          <Text>Loading...</Text>
+        </Box>
+      )}
+      {data != undefined && (
+        <SimpleGrid id="grid">
+          {data.map((activity) => (
+            <Box key={activity.id}>
+              <Image src={activity.imageUrl} />
+            </Box>
+          ))}
+        </SimpleGrid>
+      )}
     </Stack>
   );
 }
