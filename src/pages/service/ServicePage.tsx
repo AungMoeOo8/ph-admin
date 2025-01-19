@@ -37,7 +37,7 @@ export default function ServicePage() {
   });
 
   async function handleDeleteBtn(id: string) {
-    mutation.mutate(id, {
+    await mutation.mutateAsync(id, {
       onSuccess: (_, id) => {
         toaster.create({
           type: "success",

@@ -8,7 +8,10 @@ import {
   FileUploadRoot,
 } from "@/components/ui/file-upload";
 import { InputGroup } from "@/components/ui/input-group";
-import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "@/components/ui/number-input";
 import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
 import {
@@ -34,7 +37,8 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { LuFileUp } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router";
@@ -50,67 +54,102 @@ export default function EditPeoplePage() {
   const { personId } = useParams();
   const navigate = useNavigate();
 
+  const { data } = useQuery({
+    queryKey: ["editPeople"],
+    queryFn: async () => {
+      const response = await getPersonById(personId!);
+      return response.data;
+    },
+    initialData: {
+      id: "",
+      name: "",
+      position: "",
+      roles: [],
+      image: "",
+      biography: "",
+      visibility: false,
+      indexNumber: 0,
+    },
+  });
+
   const { register, handleSubmit, control, watch, getValues, setValue } =
     useForm<PersonProps>({
-      values: {
-        id: "",
-        name: "",
-        position: "",
-        roles: [],
-        image: "",
-        biography: "",
-        visibility: false,
-        indexNumber: 0,
-      } as PersonProps,
+      values: { ...data, roles: data?.roles ?? [] },
     });
 
   const [inputValue, setInputValue] = useState("");
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  useEffect(() => {
-    (async () => {
-      const response = await getPersonById(personId!);
-      const person = response.data;
-      setValue("id", person.id);
-      setValue("name", person.name);
-      setValue("position", person.position);
-      setValue("roles", person.roles ? person.roles : []);
-      setValue("image", person.image);
-      setValue("biography", person.biography);
-      setValue("visibility", person.visibility);
-      setValue("indexNumber", person.indexNumber);
-    })();
-  }, []);
+  const deleteFileMutation = useMutation({
+    mutationFn: async (imageUrl: string) => {
+      const response = await deleteFile(imageUrl);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
+  const uploadFileMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const response = await uploadFile(file);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
+  const updatePersonMutation = useMutation({
+    mutationFn: async (person: PersonProps) => {
+      const response = await updatePerson(person.id, person);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
     if (uploadImage.length > 0) {
       const imageUrl = person.image.slice(person.image.indexOf("/2024"));
-      const deleteResponse = await deleteFile(imageUrl);
 
-      if (!deleteResponse.isSuccess) {
-        toaster.create({
-          type: "error",
-          description: deleteResponse.message,
+      await deleteFileMutation.mutateAsync(imageUrl, {
+        onError: () => {
+          toaster.create({
+            type: "error",
+            description: "Deleting previous image failed.",
+          });
+          return;
+        },
+      });
+
+      if (uploadImage.length > 0) {
+        await uploadFileMutation.mutateAsync(uploadImage[0], {
+          onSuccess: (data) => {
+            person.image = data.url;
+          },
+          onError: (error) => {
+            toaster.create({
+              type: "error",
+              description: error.message,
+            });
+            return;
+          },
         });
-        return;
       }
     }
 
-    if (uploadImage.length > 0) {
-      const uploadResponse = await uploadFile(uploadImage[0]);
-      if (!uploadResponse.isSuccess) {
+    await updatePersonMutation.mutateAsync(person, {
+      onSuccess: (data) => {
+        toaster.create({
+          type: "success",
+          description: data.message,
+        });
+        navigate("/dashboard/people", { replace: true });
+      },
+      onError: (error) => {
         toaster.create({
           type: "error",
-          description: uploadResponse.message,
+          description: error.message,
         });
         return;
-      }
-
-      person.image = uploadResponse.url;
-    }
-
-    await updatePerson(person.id, person);
-    navigate("/dashboard/people", { replace: true });
+      },
+    });
   };
 
   const addRole = () => {

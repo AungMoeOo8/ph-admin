@@ -34,6 +34,7 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
+import { useMutation } from "@tanstack/react-query";
 
 const positons = createListCollection({
   items: [
@@ -62,24 +63,56 @@ export default function AddPeoplePage() {
   const [inputValue, setInputValue] = useState("");
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
+  const uploadFileMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const response = await uploadFile(file);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
+  const createPersonMutation = useMutation({
+    mutationFn: async (person: PersonProps) => {
+      const response = await createPerson(person);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
   const handleSaveBtn: SubmitHandler<PersonProps> = async (person) => {
     if (uploadImage.length > 0) {
-      const uploadResponse = await uploadFile(uploadImage[0]);
-      if (!uploadResponse.isSuccess) {
-        toaster.create({
-          type: "error",
-          description: "Image upload failed.",
-        });
-        return;
-      }
-
-      person.image = uploadResponse.url;
+      await uploadFileMutation.mutateAsync(uploadImage[0], {
+        onSuccess: (data) => {
+          person.image = data.url;
+        },
+        onError: () => {
+          toaster.create({
+            type: "error",
+            description: "Image upload failed.",
+          });
+          return;
+        },
+      });
     }
 
     person.id = uuidv4();
-    await createPerson(person);
 
-    navigate("/dashboard/people", { replace: true });
+    await createPersonMutation.mutateAsync(person, {
+      onSuccess: (data) => {
+        toaster.create({
+          type: "success",
+          description: data.message,
+        });
+        navigate("/dashboard/people", { replace: true });
+      },
+      onError: (error) => {
+        toaster.create({
+          type: "error",
+          description: error.message,
+        });
+        return;
+      },
+    });
   };
 
   const addRole = () => {

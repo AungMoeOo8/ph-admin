@@ -11,6 +11,8 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
+import { useMutation } from "@tanstack/react-query";
+import { toaster } from "@/components/ui/toaster";
 
 export default function AddCoursePage() {
   const navigate = useNavigate();
@@ -31,11 +33,31 @@ export default function AddCoursePage() {
 
   const [outlineInput, setOutlineInput] = useState("");
 
+  const createCourseMutation = useMutation({
+    mutationFn: async (course: CourseProps) => {
+      const response = await createCourse(course);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
     course.id = uuidv4();
-    await createCourse(course);
-
-    navigate("/dashboard/course", { replace: true });
+    await createCourseMutation.mutateAsync(course, {
+      onSuccess: (data) => {
+        toaster.create({
+          type: "success",
+          description: data.message,
+        });
+        navigate("/dashboard/course", { replace: true });
+      },
+      onError: (error) => {
+        toaster.create({
+          type: "error",
+          description: error.message,
+        });
+      },
+    });
   };
 
   const addOutline = () => {

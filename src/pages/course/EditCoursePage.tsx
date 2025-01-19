@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
 import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import {
@@ -10,37 +10,41 @@ import {
   updateCourse,
   CourseProps,
 } from "@/features/wordpress/course.service";
-import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "@/components/ui/number-input";
+import { useQuery } from "@tanstack/react-query";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
 
-  const { register, handleSubmit, control, getValues, setValue, reset } =
+  const { data } = useQuery({
+    queryKey: ["editCourse"],
+    queryFn: async () => {
+      const course = await getCourseById(courseId!);
+      course.data.outlines = course.data.outlines ?? [];
+      return course.data;
+    },
+    initialData: {
+      id: "",
+      title: "",
+      duration: "",
+      instructor: "",
+      guestLecturer: "",
+      outlines: [],
+      visibility: false,
+      indexNumber: 0,
+    },
+  });
+
+  const { register, handleSubmit, control, getValues, setValue } =
     useForm<CourseProps>({
-      defaultValues: {
-        id: "",
-        title: "",
-        duration: "",
-        instructor: "",
-        guestLecturer: "",
-        outlines: [],
-        visibility: false,
-        indexNumber: 0,
-      },
+      values: data,
     });
 
   const [outlineInput, setOutlineInput] = useState("");
-
-  useEffect(() => {
-    async function fetchCourse() {
-      //   if (!courseId) return;
-      const course = await getCourseById(courseId!);
-      course.data.outlines = course.data.outlines ? course.data.outlines : [];
-      reset(course.data);
-    }
-    fetchCourse();
-  }, []);
 
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
     if (!courseId) return;

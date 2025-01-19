@@ -48,6 +48,8 @@ import {
   DialogRoot,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toaster } from "@/components/ui/toaster";
+import { useMutation } from "@tanstack/react-query";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -111,11 +113,7 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
     }
 
     append(feeInputs);
-    setFeeInputs({
-      type: "",
-      amount: 0,
-      description: "",
-    });
+    setFeeInputs(initialFeeInputs);
   };
 
   return (
@@ -294,11 +292,33 @@ export default function AddServicePage() {
     },
   });
 
+  const mutation = useMutation({
+    mutationFn: async (service: ServiceProps) => {
+      const response = await createService(service);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
     service.id = uuidv4();
-    await createService(service);
 
-    navigate("/dashboard/service", { replace: true });
+    await mutation.mutateAsync(service, {
+      onSuccess: (response) => {
+        toaster.create({
+          type: "success",
+          description: response.message,
+        });
+        navigate("/dashboard/service", { replace: true });
+      },
+      onError: (error) => {
+        toaster.create({
+          type: "error",
+          description: error.message,
+        });
+      },
+    });
+    
   };
 
   return (

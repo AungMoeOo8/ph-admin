@@ -37,7 +37,7 @@ export default function ActivityPage() {
         </Box>
       )}
       {data != undefined && (
-        <SimpleGrid id="grid">
+        <SimpleGrid id="grid"  columnCount={3}>
           {data.map((activity) => (
             <Box key={activity.id}>
               <Image src={activity.imageUrl} />

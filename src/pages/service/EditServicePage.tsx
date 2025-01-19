@@ -1,6 +1,9 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "@/components/ui/number-input";
 import {
   getServiceById,
   ServiceProps,
@@ -38,7 +41,7 @@ import {
   LuX,
 } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   DialogActionTrigger,
   DialogBody,
@@ -48,6 +51,8 @@ import {
   DialogRoot,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toaster } from "@/components/ui/toaster";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -283,8 +288,13 @@ export default function EditPeoplePage() {
   const navigate = useNavigate();
   const { serviceId } = useParams();
 
-  const { register, handleSubmit, control, setValue } = useForm<ServiceProps>({
-    defaultValues: {
+  const { data } = useQuery({
+    queryKey: ["editService"],
+    queryFn: async () => {
+      const response = await getServiceById(serviceId!);
+      return response.data;
+    },
+    initialData: {
       id: "",
       provider: "",
       name: "",
@@ -296,25 +306,34 @@ export default function EditPeoplePage() {
     },
   });
 
-  useEffect(() => {
-    (async () => {
-      const response = await getServiceById(serviceId!);
-      const service = response.data;
-      setValue("id", service.id);
-      setValue("provider", service.provider);
-      setValue("name", service.name);
-      setValue("description", service.description);
-      setValue("fees", service.fees);
-      setValue("ending", service.ending);
-      setValue("indexNumber", service.indexNumber);
-      setValue("visibility", service.visibility);
-    })();
-  }, []);
+  const mutation = useMutation({
+    mutationFn: async (service: ServiceProps) => {
+      const response = await updateService(service.id, service);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
+  const { register, handleSubmit, control } = useForm<ServiceProps>({
+    values: data,
+  });
 
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
-    await updateService(service.id, service);
-
-    navigate("/dashboard/service", { replace: true });
+    await mutation.mutateAsync(service, {
+      onSuccess: (response) => {
+        toaster.create({
+          type: "success",
+          description: response.message,
+        });
+        navigate("/dashboard/service", { replace: true });
+      },
+      onError: (error) => {
+        toaster.create({
+          type: "error",
+          description: error.message,
+        });
+      },
+    });
   };
 
   return (
