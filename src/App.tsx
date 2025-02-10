@@ -6,11 +6,11 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isValid = location.pathname.includes("/dashboard", 0);
+    // const isValid = location.pathname.includes("/dashboard", 0);
 
-    if (!isValid) {
-      navigate("/dashboard", { replace: true });
-    }
+    // if (!isValid) {
+    //   navigate("/dashboard", { replace: true });
+    // }
   }, [location]);
 
   return <Outlet />;

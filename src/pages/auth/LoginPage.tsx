@@ -1,7 +1,9 @@
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
+import { login } from "@/features/wordpress/auth.service";
 import { Button, Center, Fieldset, Input } from "@chakra-ui/react";
 import { useReducer } from "react";
+import { useNavigate } from "react-router";
 
 type CredentialProps = {
   email: string;
@@ -23,6 +25,8 @@ function credentialReducer(
 }
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const [state, dispatch] = useReducer(credentialReducer, {
     email: "",
     password: "",
@@ -44,7 +48,15 @@ export default function LoginPage() {
     });
   }
 
-  function handleLogin() {}
+  async function handleLogin() {
+    const response = await login(state.email, state.password);
+
+    if (!response.isSuccess) {
+      alert("login failed.");
+    }
+
+    navigate("/dashboard/", { replace: false });
+  }
 
   return (
     <Center h={"dvh"} p={4}>

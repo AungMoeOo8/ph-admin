@@ -15,8 +15,9 @@ import {
   Heading,
   IconButton,
 } from "@chakra-ui/react";
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useNavigate } from "react-router";
 import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
+import { logout } from "@/features/wordpress/auth.service";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people", icon: LuUsers },
@@ -26,7 +27,14 @@ const navLinks = [
 ];
 
 export default function DashboardLayout() {
-  async function handleLogout() {}
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    const response = await logout();
+    if (response.isSuccess) {
+      navigate("/", { replace: true });
+    }
+  }
 
   return (
     <DrawerRoot placement={"start"}>
