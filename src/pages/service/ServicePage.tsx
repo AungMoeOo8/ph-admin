@@ -1,8 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import {
-  deleteService,
-  getServices,
-} from "@/features/wordpress/service.service";
+import { deleteService, getServices } from "@/features/supabase/service.service";
+import { useOnceQuery } from "@/hooks/useOnceQuery";
 import { queryClient } from "@/main";
 import {
   Badge,
@@ -14,18 +12,20 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function ServicePage() {
-  const { data, isPending } = useQuery({
+
+  const { data, isPending } = useOnceQuery({
     queryKey: ["services"],
     queryFn: async () => {
       const response = await getServices();
       if (!response.isSuccess) throw new Error(response.message);
       return response.data;
     },
+    initialData: null,
   });
 
   const mutation = useMutation({
@@ -70,7 +70,7 @@ export default function ServicePage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      {data != undefined && (
+      {data != null && (
         <Table.Root size={"lg"}>
           <Table.Header>
             <Table.Row>

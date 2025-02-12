@@ -1,51 +1,45 @@
 import { supabase } from "./supabaseConfig";
 
 type FileResponseType = {
-    isSuccess: boolean,
-    message: string,
-    url: string
-}
+    isSuccess: boolean;
+    message: string;
+    url?: string;
+};
 
-export async function uploadFile(folderName: string, file: File) {
+/**
+ * Uploads a file to Supabase storage.
+ */
+export async function uploadFile(folderName: string, file: File): Promise<FileResponseType> {
     try {
-        const uploadResponse = await supabase
-            .storage
+        const { data, error } = await supabase.storage
             .from("org_images")
-            .upload(`${folderName}/${file.name}`, file)
+            .upload(`${folderName}/${file.name}`, file);
 
-        if (uploadResponse.error) {
-            return {
-                isSuccess: false,
-                message: "Uploading failed."
-            } as FileResponseType;
+        if (error) {
+            return { isSuccess: false, message: error.message };
         }
 
-        const publicUrlResponse = supabase.storage.from("org_images").getPublicUrl(uploadResponse.data.path);
+        const { data: publicUrlData } = supabase.storage.from("org_images").getPublicUrl(data.path);
 
-        return {
-            isSuccess: true,
-            message: "Uploading successful.",
-            url: publicUrlResponse.data.publicUrl
-        } as FileResponseType;
-
+        return { isSuccess: true, message: "Uploading successful.", url: publicUrlData.publicUrl };
     } catch {
-        return {
-            isSuccess: false,
-            message: "Uploading failed."
-        } as FileResponseType;
+        return { isSuccess: false, message: "Uploading failed." };
     }
 }
 
-export async function deleteFile(filePath: string) {
-    const { error } = await supabase
-        .storage
-        .from('org_images')
-        .remove([filePath])
+/**
+ * Deletes a file from Supabase storage.
+ */
+export async function deleteFile(filePath: string): Promise<FileResponseType> {
+    try {
+        const { error } = await supabase.storage.from("org_images").remove([filePath]);
 
-    if (error) {
-        return { isSuccess: false, message: "Deleting failed." } as FileResponseType;
+        if (error) {
+            return { isSuccess: false, message: error.message };
+        }
+
+        return { isSuccess: true, message: "Deleting successful." };
+    } catch {
+        return { isSuccess: false, message: "Deleting failed." };
     }
-
-    return { isSuccess: true, message: "Deleting successful." } as FileResponseType;
-
 }

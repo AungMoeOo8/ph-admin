@@ -5,81 +5,106 @@ export type PersonProps = {
     name: string;
     image: string;
     position: string;
-    roles: string[];
+    roles: string[]; // Ensure roles are always an array
     biography: string;
     visibility: boolean;
     indexNumber: number;
+};
+
+type PersonSupabaseType = Omit<PersonProps, "roles"> & { roles: string }; // Supabase stores roles as a string
+
+type ApiResponse<T> = {
+    isSuccess: boolean;
+    message: string;
+    data: T | null;
+};
+
+/**
+ * Converts Supabase data format to a JavaScript-friendly format.
+ */
+function toPerson(obj: PersonSupabaseType): PersonProps {
+    return {
+        ...obj,
+        roles: obj.roles ? JSON.parse(obj.roles) : [], // Ensure roles is always an array
+    };
 }
 
-type PersonSupabaseType = {
-    id: string;
-    name: string;
-    image: string;
-    position: string;
-    roles: string;
-    biography: string;
-    visibility: boolean;
-    indexNumber: number;
-}
-
-function toPerson(obj: PersonSupabaseType) {
-    const roles = JSON.parse(obj?.roles) as string[];
-    const person = { ...obj, roles: roles } as PersonProps;
-    return person
-}
-
-export async function getPeople() {
-    const { data, error } = await supabase.from("people").select("*").returns<PersonSupabaseType[]>()
-
-    const response = data?.map(item => {
-        const people = toPerson(item)
-        return people
-    })
+/**
+ * Retrieves all people from Supabase.
+ */
+export async function getPeople(): Promise<ApiResponse<PersonProps[]>> {
+    const { data, error } = await supabase.from("people").select("*");
 
     return {
-        isSuccess: error == null,
-        message: error == null ? "Retrieving successful." : "Retrieving failed.",
-        data: response || []
-    } as { isSuccess: boolean, message: string, data: PersonProps[] };
+        isSuccess: !error,
+        message: error?.message || "Retrieving successful.",
+        data: data ? data.map(toPerson) : null,
+    };
 }
 
-export async function getPersonById(id: string) {
-    const { data, error } = await supabase.from("people").select("*").eq("id", id).limit(1).single<PersonSupabaseType>()
-
-    const person = toPerson(data!)
-
-    const response = {
-        isSuccess: error == null,
-        message: error == null ? "Retrieving successful." : "Retrieving failed.",
-        data: person
-    } as { isSuccess: boolean, message: string, data: PersonProps };
-
-    return response
-}
-
-export async function createPerson(person: PersonProps) {
-    const { error } = await supabase.from("people").insert(person);
+/**
+ * Retrieves a single person by ID.
+ */
+export async function getPersonById(id: string): Promise<ApiResponse<PersonProps>> {
+    const { data, error } = await supabase.from("people").select("*").eq("id", id).single();
 
     return {
-        isSuccess: error == null,
-        message: error == null ? "Saving successful." : "Saving failed.",
-    } as { isSuccess: boolean, message: string, data: PersonProps };
+        isSuccess: !error,
+        message: error?.message || "Retrieving successful.",
+        data: data ? toPerson(data) : null,
+    };
 }
 
-export async function updatePerson(id: string, person: PersonProps) {
-    const { error } = await supabase.from("people").update(person).eq("id", id)
+/**
+ * Creates a new person in Supabase.
+ */
+export async function createPerson(person: Omit<PersonProps, "id">): Promise<ApiResponse<PersonProps>> {
+    const { data, error } = await supabase
+        .from("people")
+        .insert({
+            ...person,
+            roles: JSON.stringify(person.roles), // Ensure roles is stored as JSON
+        })
+        .select()
+        .single();
 
     return {
-        isSuccess: error == null,
-        message: error == null ? "Updating successful." : "Updating failed.",
-    } as { isSuccess: boolean, message: string, data: PersonProps };
+        isSuccess: !error,
+        message: error?.message || "Person created successfully.",
+        data: data ? toPerson(data) : null,
+    };
 }
 
-export async function deletePerson(id: string) {
-    const res = await supabase.from("people").delete().eq("id", id)
+/**
+ * Updates an existing person by ID (supports partial updates).
+ */
+export async function updatePerson(id: string, person: Partial<PersonProps>): Promise<ApiResponse<PersonProps>> {
+    const { data, error } = await supabase
+        .from("people")
+        .update({
+            ...person,
+            roles: person.roles ? JSON.stringify(person.roles) : undefined, // Only stringify if updating roles
+        })
+        .eq("id", id)
+        .select()
+        .single();
 
     return {
-        isSuccess: res.status == 204,
-        message: res.status == 204 ? "Deleting successful." : "Deleting failed.",
-    } as { isSuccess: boolean, message: string, data: PersonProps };
+        isSuccess: !error,
+        message: error?.message || "Person updated successfully.",
+        data: data ? toPerson(data) : null,
+    };
+}
+
+/**
+ * Deletes a person by ID.
+ */
+export async function deletePerson(id: string): Promise<ApiResponse<null>> {
+    const { error } = await supabase.from("people").delete().eq("id", id);
+
+    return {
+        isSuccess: !error,
+        message: error?.message || "Person deleted successfully.",
+        data: null,
+    };
 }

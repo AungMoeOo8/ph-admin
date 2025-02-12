@@ -74,7 +74,7 @@ export default function EditPeoplePage() {
 
   const { register, handleSubmit, control, watch, getValues, setValue } =
     useForm<PersonProps>({
-      values: { ...data, roles: data?.roles ?? [] },
+      values: { ...data!, roles: data?.roles ?? [] },
     });
 
   const [inputValue, setInputValue] = useState("");
@@ -121,7 +121,7 @@ export default function EditPeoplePage() {
       if (uploadImage.length > 0) {
         await uploadFileMutation.mutateAsync(uploadImage[0], {
           onSuccess: (data) => {
-            person.image = data.url;
+            person.image = data.url!;
           },
           onError: (error) => {
             toaster.create({

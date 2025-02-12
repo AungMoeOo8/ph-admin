@@ -1,6 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import { getPeople } from "@/features/supabase/people.service";
-import { deletePerson } from "@/features/wordpress/people.service";
+import { deletePerson, getPeople } from "@/features/supabase/people.service";
+import { useOnceQuery } from "@/hooks/useOnceQuery";
 import { queryClient } from "@/main";
 import {
   Badge,
@@ -13,18 +13,19 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function PeoplePage() {
-  const { data, isPending } = useQuery({
+  const { data, isPending } = useOnceQuery({
     queryKey: ["people"],
     queryFn: async () => {
       const response = await getPeople();
       if (!response.isSuccess) throw new Error(response.message);
       return response.data;
     },
+    initialData: null,
   });
 
   const mutation = useMutation({
@@ -69,7 +70,7 @@ export default function PeoplePage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      {data != undefined && (
+      {data != null && (
         <Table.Root size={"lg"}>
           <Table.Header>
             <Table.Row>
