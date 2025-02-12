@@ -14,13 +14,13 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
-import { useQuery } from "@tanstack/react-query";
+import { useOnceQuery } from "@/hooks/useOnceQuery";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
 
-  const { data } = useQuery({
+  const { data } = useOnceQuery({
     queryKey: ["editCourse"],
     queryFn: async () => {
       const course = await getCourseById(courseId!);

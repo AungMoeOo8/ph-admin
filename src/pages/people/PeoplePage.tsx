@@ -1,5 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import { deletePerson, getPeople } from "@/features/wordpress/people.service";
+import { getPeople } from "@/features/supabase/people.service";
+import { deletePerson } from "@/features/wordpress/people.service";
 import { queryClient } from "@/main";
 import {
   Badge,

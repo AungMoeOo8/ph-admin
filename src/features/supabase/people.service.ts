@@ -39,7 +39,7 @@ export async function getPeople() {
     return {
         isSuccess: error == null,
         message: error == null ? "Retrieving successful." : "Retrieving failed.",
-        data: response
+        data: response || []
     } as { isSuccess: boolean, message: string, data: PersonProps[] };
 }
 
@@ -54,28 +54,24 @@ export async function getPersonById(id: string) {
         data: person
     } as { isSuccess: boolean, message: string, data: PersonProps };
 
-    console.log(response)
-
     return response
 }
 
 export async function createPerson(person: PersonProps) {
-    const { data, error } = await supabase.from("people").insert(person).select().returns<PersonProps>();
+    const { error } = await supabase.from("people").insert(person);
 
     return {
         isSuccess: error == null,
         message: error == null ? "Saving successful." : "Saving failed.",
-        data: data
     } as { isSuccess: boolean, message: string, data: PersonProps };
 }
 
 export async function updatePerson(id: string, person: PersonProps) {
-    const { data, error } = await supabase.from("people").update(person).eq("id", id).returns<PersonProps>()
+    const { error } = await supabase.from("people").update(person).eq("id", id)
 
     return {
         isSuccess: error == null,
         message: error == null ? "Updating successful." : "Updating failed.",
-        data: data
     } as { isSuccess: boolean, message: string, data: PersonProps };
 }
 

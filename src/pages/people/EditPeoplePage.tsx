@@ -18,9 +18,9 @@ import {
   getPersonById,
   PersonProps,
   updatePerson,
-} from "@/features/wordpress/people.service";
-import { deleteFile, uploadFile } from "@/features/wordpress/upload.service";
-
+} from "@/features/supabase/people.service";
+import { deleteFile, uploadFile } from "@/features/supabase/upload.service";
+import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
   Box,
   createListCollection,
@@ -37,7 +37,7 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { LuFileUp } from "react-icons/lu";
@@ -54,8 +54,8 @@ export default function EditPeoplePage() {
   const { personId } = useParams();
   const navigate = useNavigate();
 
-  const { data } = useQuery({
-    queryKey: ["editPeople"],
+  const { data } = useOnceQuery({
+    queryKey: ["editPeople", personId],
     queryFn: async () => {
       const response = await getPersonById(personId!);
       return response.data;
@@ -90,7 +90,7 @@ export default function EditPeoplePage() {
 
   const uploadFileMutation = useMutation({
     mutationFn: async (file: File) => {
-      const response = await uploadFile(file);
+      const response = await uploadFile("profile", file);
       if (!response.isSuccess) throw new Error(response.message);
       return response;
     },
@@ -106,9 +106,9 @@ export default function EditPeoplePage() {
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
     if (uploadImage.length > 0) {
-      const imageUrl = person.image.slice(person.image.indexOf("/2024"));
+      // const imageUrl = person.image.slice(person.image.indexOf("/2024"));
 
-      await deleteFileMutation.mutateAsync(imageUrl, {
+      await deleteFileMutation.mutateAsync(person.image, {
         onError: () => {
           toaster.create({
             type: "error",

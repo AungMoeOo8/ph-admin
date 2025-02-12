@@ -21,7 +21,6 @@ import {
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import { createPerson, PersonProps } from "@/features/wordpress/people.service";
 import {
   FileUploadList,
   FileUploadRoot,
@@ -35,6 +34,7 @@ import {
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { useMutation } from "@tanstack/react-query";
+import { createPerson, PersonProps } from "@/features/supabase/people.service";
 
 const positons = createListCollection({
   items: [
