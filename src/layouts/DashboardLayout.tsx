@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
-import { logout } from "@/features/wordpress/auth.service";
+import { logout } from "@/features/supabase/auth.service";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people", icon: LuUsers },

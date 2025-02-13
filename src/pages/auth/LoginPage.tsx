@@ -1,55 +1,26 @@
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { login } from "@/features/wordpress/auth.service";
+import { login } from "@/features/supabase/auth.service";
 import { Button, Center, Fieldset, Input } from "@chakra-ui/react";
-import { useReducer } from "react";
+import { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router";
-
-type CredentialProps = {
-  email: string;
-  password: string;
-};
-
-function credentialReducer(
-  state: CredentialProps,
-  action: { type: string; email: string; password: string }
-) {
-  switch (action.type) {
-    case "email":
-      return { email: action.email, password: state.password };
-    case "password":
-      return { email: state.email, password: action.password };
-    default:
-      return state;
-  }
-}
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const [state, dispatch] = useReducer(credentialReducer, {
-    email: "",
-    password: "",
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  function HandleEmail(e: React.ChangeEvent<HTMLInputElement>) {
-    dispatch({
-      type: "email",
-      email: e.target.value,
-      password: state.password,
-    });
+  function onEmailChange(e: ChangeEvent<HTMLInputElement>) {
+    setEmail(e.target.value);
   }
 
-  function HandlePassword(e: React.ChangeEvent<HTMLInputElement>) {
-    dispatch({
-      type: "password",
-      email: state.email,
-      password: e.target.value,
-    });
+  function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
+    setPassword(e.target.value);
   }
 
   async function handleLogin() {
-    const response = await login(state.email, state.password);
+    const response = await login(email, password);
 
     if (!response.isSuccess) {
       alert("login failed.");
@@ -66,10 +37,10 @@ export default function LoginPage() {
         </Fieldset.Legend>
         <Fieldset.Content>
           <Field label="Email">
-            <Input onChange={HandleEmail} />
+            <Input onChange={onEmailChange} />
           </Field>
           <Field label="Password">
-            <PasswordInput onChange={HandlePassword} />
+            <PasswordInput onChange={onPasswordChange} />
           </Field>
         </Fieldset.Content>
         <Button onClick={handleLogin}>Login</Button>
