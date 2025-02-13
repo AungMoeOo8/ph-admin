@@ -6,15 +6,11 @@ import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import {
-  getCourseById,
-  updateCourse,
-  CourseProps,
-} from "@/features/wordpress/course.service";
-import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
+import { CourseProps, getCourseById, updateCourse } from "@/features/supabase/course.service";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();
@@ -24,7 +20,7 @@ export default function EditCoursePage() {
     queryKey: ["editCourse"],
     queryFn: async () => {
       const course = await getCourseById(courseId!);
-      course.data.outlines = course.data.outlines ?? [];
+      course.data!.outlines = course.data!.outlines ?? [];
       return course.data;
     },
     initialData: {

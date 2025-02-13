@@ -16,7 +16,7 @@ type ServiceSupabaseType = Omit<ServiceProps, "fees"> & { fees: string };
 type ApiResponse<T> = {
     isSuccess: boolean;
     message: string;
-    data: T | null;
+    data?: T;
 };
 
 function toService(obj: ServiceSupabaseType): ServiceProps {
@@ -32,7 +32,7 @@ export async function getServices(): Promise<ApiResponse<ServiceProps[]>> {
     return {
         isSuccess: !error,
         message: error?.message || "Retrieving successful.",
-        data: data ? data.map(toService) : null,
+        data: data ? data.map(toService) : undefined,
     };
 }
 
@@ -42,7 +42,7 @@ export async function getServiceById(id: string): Promise<ApiResponse<ServicePro
     return {
         isSuccess: !error,
         message: error?.message || "Retrieving successful.",
-        data: data ? toService(data) : null,
+        data: data ? toService(data) : undefined,
     };
 }
 
@@ -59,7 +59,7 @@ export async function createService(service: Omit<ServiceProps, "id">): Promise<
     return {
         isSuccess: !error,
         message: error?.message || "Service created successfully.",
-        data: data ? toService(data) : null,
+        data: data ? toService(data) : undefined,
     };
 }
 
@@ -77,7 +77,7 @@ export async function updateService(id: string, service: Partial<ServiceProps>):
     return {
         isSuccess: !error,
         message: error?.message || "Service updated successfully.",
-        data: data ? toService(data) : null,
+        data: data ? toService(data) : undefined,
     };
 }
 

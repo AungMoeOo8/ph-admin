@@ -16,7 +16,7 @@ type PersonSupabaseType = Omit<PersonProps, "roles"> & { roles: string }; // Sup
 type ApiResponse<T> = {
     isSuccess: boolean;
     message: string;
-    data: T | null;
+    data?: T;
 };
 
 /**
@@ -38,7 +38,7 @@ export async function getPeople(): Promise<ApiResponse<PersonProps[]>> {
     return {
         isSuccess: !error,
         message: error?.message || "Retrieving successful.",
-        data: data ? data.map(toPerson) : null,
+        data: data ? data.map(toPerson) : undefined,
     };
 }
 
@@ -51,7 +51,7 @@ export async function getPersonById(id: string): Promise<ApiResponse<PersonProps
     return {
         isSuccess: !error,
         message: error?.message || "Retrieving successful.",
-        data: data ? toPerson(data) : null,
+        data: data ? toPerson(data) : undefined,
     };
 }
 
@@ -71,7 +71,7 @@ export async function createPerson(person: Omit<PersonProps, "id">): Promise<Api
     return {
         isSuccess: !error,
         message: error?.message || "Person created successfully.",
-        data: data ? toPerson(data) : null,
+        data: data ? toPerson(data) : undefined,
     };
 }
 
@@ -92,7 +92,7 @@ export async function updatePerson(id: string, person: Partial<PersonProps>): Pr
     return {
         isSuccess: !error,
         message: error?.message || "Person updated successfully.",
-        data: data ? toPerson(data) : null,
+        data: data ? toPerson(data) : undefined,
     };
 }
 

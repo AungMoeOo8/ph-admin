@@ -16,7 +16,7 @@ type CourseSupabaseType = Omit<CourseProps, "outlines"> & { outlines: string };
 type ApiResponse<T> = {
     isSuccess: boolean;
     message: string;
-    data: T | null;
+    data?: T;
 };
 
 function toCourse(obj: CourseSupabaseType): CourseProps {
@@ -32,7 +32,7 @@ export async function getCourses(): Promise<ApiResponse<CourseProps[]>> {
     return {
         isSuccess: !error,
         message: error?.message || "Retrieving successful.",
-        data: data ? data.map(toCourse) : null,
+        data: data ? data.map(toCourse) : undefined,
     };
 }
 
@@ -42,7 +42,7 @@ export async function getCourseById(id: string): Promise<ApiResponse<CourseProps
     return {
         isSuccess: !error,
         message: error?.message || "Retrieving successful.",
-        data: data ? toCourse(data) : null,
+        data: data ? toCourse(data) : undefined,
     };
 }
 
@@ -59,7 +59,7 @@ export async function createCourse(course: Omit<CourseProps, "id">): Promise<Api
     return {
         isSuccess: !error,
         message: error?.message || "Course created successfully.",
-        data: data ? toCourse(data) : null,
+        data: data ? toCourse(data) : undefined,
     };
 }
 
@@ -77,7 +77,7 @@ export async function updateCourse(id: string, course: Partial<CourseProps>): Pr
     return {
         isSuccess: !error,
         message: error?.message || "Course updated successfully.",
-        data: data ? toCourse(data) : null,
+        data: data ? toCourse(data) : undefined,
     };
 }
 

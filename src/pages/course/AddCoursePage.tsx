@@ -6,13 +6,13 @@ import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import { createCourse, CourseProps } from "@/features/wordpress/course.service";
 import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
+import { CourseProps, createCourse } from "@/features/supabase/course.service";
 
 export default function AddCoursePage() {
   const navigate = useNavigate();

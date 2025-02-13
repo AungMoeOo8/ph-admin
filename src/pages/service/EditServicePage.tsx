@@ -5,11 +5,6 @@ import {
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import {
-  getServiceById,
-  ServiceProps,
-  updateService,
-} from "@/features/wordpress/service.service";
-import {
   Box,
   Button,
   Card,
@@ -51,8 +46,10 @@ import {
   DialogRoot,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
+import { useOnceQuery } from "@/hooks/useOnceQuery";
+import { getServiceById, ServiceProps, updateService } from "@/features/supabase/service.service";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -288,7 +285,7 @@ export default function EditPeoplePage() {
   const navigate = useNavigate();
   const { serviceId } = useParams();
 
-  const { data } = useQuery({
+  const { data } = useOnceQuery({
     queryKey: ["editService"],
     queryFn: async () => {
       const response = await getServiceById(serviceId!);
