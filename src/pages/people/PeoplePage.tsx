@@ -1,5 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
 import { deletePerson, getPeople } from "@/features/supabase/people.service";
+import { deleteFile } from "@/features/supabase/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import { queryClient } from "@/main";
 import {
@@ -28,7 +29,15 @@ export default function PeoplePage() {
     initialData: null,
   });
 
-  const mutation = useMutation({
+  const deleteFileMutation = useMutation({
+    mutationFn: async (filePath: string) => {
+      const response = await deleteFile(filePath);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
+  const deletePersonMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await deletePerson(id);
       if (!response.isSuccess) throw new Error(response.message);
@@ -36,16 +45,26 @@ export default function PeoplePage() {
     },
   });
 
-  async function handleDeleteBtn(id: string) {
-    mutation.mutate(id, {
-      onSuccess: (_, id) => {
-        toaster.create({
-          type: "success",
-          description: "Deleting successful.",
+  async function handleDeleteBtn(id: string, filePath: string) {
+    deleteFileMutation.mutateAsync(filePath, {
+      onSuccess: () => {
+        deletePersonMutation.mutateAsync(id, {
+          onSuccess: (_, id) => {
+            toaster.create({
+              type: "success",
+              description: "Deleting successful.",
+            });
+            queryClient.setQueryData(["people"], () =>
+              data?.filter((x) => x.id !== id)
+            );
+          },
+          onError: () => {
+            toaster.create({
+              type: "error",
+              description: "Deleting failed.",
+            });
+          },
         });
-        queryClient.setQueryData(["people"], () =>
-          data?.filter((x) => x.id !== id)
-        );
       },
       onError: () => {
         toaster.create({
@@ -130,7 +149,12 @@ export default function PeoplePage() {
                     </IconButton>
                     <IconButton
                       colorPalette={"red"}
-                      onClick={async () => await handleDeleteBtn(person.id)}
+                      onClick={async () => {
+                        const filePath = person.image.slice(
+                          person.image.indexOf("profile/")
+                        );
+                        await handleDeleteBtn(person.id, filePath);
+                      }}
                     >
                       <LuTrash />
                     </IconButton>

@@ -19,7 +19,7 @@ import {
   PersonProps,
   updatePerson,
 } from "@/features/supabase/people.service";
-import { deleteFile, uploadFile } from "@/features/supabase/upload.service";
+import { updateFile, uploadFile } from "@/features/supabase/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
   Box,
@@ -80,9 +80,15 @@ export default function EditPeoplePage() {
   const [inputValue, setInputValue] = useState("");
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  const deleteFileMutation = useMutation({
-    mutationFn: async (imageUrl: string) => {
-      const response = await deleteFile(imageUrl);
+  const updateFileMutation = useMutation({
+    mutationFn: async ({
+      filePath,
+      file,
+    }: {
+      filePath: string;
+      file: File;
+    }) => {
+      const response = await updateFile(filePath, file);
       if (!response.isSuccess) throw new Error(response.message);
       return response;
     },
@@ -105,20 +111,28 @@ export default function EditPeoplePage() {
   });
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
+    console.log(person);
     if (uploadImage.length > 0) {
       // const imageUrl = person.image.slice(person.image.indexOf("/2024"));
+      if (person.image != "") {
+        const filePath = person.image.slice(person.image.indexOf("profile/"));
 
-      await deleteFileMutation.mutateAsync(person.image, {
-        onError: () => {
-          toaster.create({
-            type: "error",
-            description: "Deleting previous image failed.",
-          });
-          return;
-        },
-      });
-
-      if (uploadImage.length > 0) {
+        await updateFileMutation.mutateAsync(
+          { filePath, file: uploadImage[0] },
+          {
+            onSuccess(data) {
+              console.log(data.url)
+              person.image = data.url!;
+            },
+            onError: () => {
+              toaster.create({
+                type: "error",
+                description: "Image updating failed.",
+              });
+            },
+          }
+        );
+      } else {
         await uploadFileMutation.mutateAsync(uploadImage[0], {
           onSuccess: (data) => {
             person.image = data.url!;
