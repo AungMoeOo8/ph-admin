@@ -5,10 +5,6 @@ import { Box, Button, Fieldset, Flex, Heading, Image } from "@chakra-ui/react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import {
-  createActivity,
-  ActivityProps,
-} from "@/features/wordpress/activity.service";
-import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
@@ -19,8 +15,13 @@ import {
 } from "@/components/ui/file-upload";
 import { LuUpload } from "react-icons/lu";
 import { useMemo, useState } from "react";
-import { uploadFile } from "@/features/wordpress/upload.service";
 import { toaster } from "@/components/ui/toaster";
+import { useMutation } from "@tanstack/react-query";
+import { uploadFile } from "@/features/supabase/upload.service";
+import {
+  ActivityProps,
+  createActivity,
+} from "@/features/supabase/activity.service";
 
 export default function AddActivityPage() {
   const navigate = useNavigate();
@@ -43,27 +44,46 @@ export default function AddActivityPage() {
     return watch("imageUrl");
   }, [uploadImage, watch("imageUrl")]);
 
+  const uploadFileMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const response = await uploadFile("activity", file);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
+  const createActivityMutation = useMutation({
+    mutationFn: async (activity: ActivityProps) => {
+      const response = await createActivity(activity);
+      if (!response.isSuccess) throw new Error(response.message);
+      return response;
+    },
+  });
+
   const handleSaveBtn: SubmitHandler<ActivityProps> = async (activity) => {
-    const uploadResponse = await uploadFile(uploadImage[0]);
-    if (!uploadResponse.isSuccess) {
-      toaster.create({
-        type: "error",
-        description: uploadResponse.message,
-      });
-      return;
-    }
+    const response = await uploadFileMutation.mutateAsync(uploadImage[0], {
+      onError: (error) => {
+        toaster.create({
+          type: "error",
+          description: error.message,
+        });
+        return;
+      },
+    });
 
     activity.id = uuidv4();
-    activity.imageUrl = uploadResponse.url;
-    const activityCreateResponse = await createActivity(activity);
-    if (!activityCreateResponse.isSuccess) {
-      toaster.create({
-        type: "error",
-        description: activityCreateResponse.message,
-      });
-      return;
-    }
-    navigate("/admin/activity", { replace: true });
+    activity.imageUrl = response.url!;
+    await createActivityMutation.mutateAsync(activity, {
+      onError(error) {
+        toaster.create({
+          type: "error",
+          description: error.message,
+        });
+        return;
+      },
+    });
+
+    navigate("/dashboard/activity", { replace: true });
   };
 
   return (

@@ -47,24 +47,24 @@ export default function PeoplePage() {
 
   async function handleDeleteBtn(id: string, filePath: string) {
     deleteFileMutation.mutateAsync(filePath, {
-      onSuccess: () => {
-        deletePersonMutation.mutateAsync(id, {
-          onSuccess: (_, id) => {
-            toaster.create({
-              type: "success",
-              description: "Deleting successful.",
-            });
-            queryClient.setQueryData(["people"], () =>
-              data?.filter((x) => x.id !== id)
-            );
-          },
-          onError: () => {
-            toaster.create({
-              type: "error",
-              description: "Deleting failed.",
-            });
-          },
+      onError: () => {
+        toaster.create({
+          type: "error",
+          description: "Deleting failed.",
         });
+        return;
+      },
+    });
+
+    deletePersonMutation.mutateAsync(id, {
+      onSuccess: (_, id) => {
+        toaster.create({
+          type: "success",
+          description: "Deleting successful.",
+        });
+        queryClient.setQueryData(["people"], () =>
+          data?.filter((x) => x.id !== id)
+        );
       },
       onError: () => {
         toaster.create({

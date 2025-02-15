@@ -54,10 +54,6 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="activity">
                     <Route index element={<ActivityPage />} />
                     <Route path="new" element={<AddActivityPage />} />
-                    <Route
-                      path=":activityId/edit"
-                      element={<EditCoursePage />}
-                    />
                   </Route>
                 </Route>
               </Route>

@@ -8,7 +8,6 @@ export default function App() {
   const auth = useAuthStateChange();
 
   useEffect(() => {
-    console.log(location.pathname);
 
     if (auth.session) {
       if (location.pathname == "/login") {
