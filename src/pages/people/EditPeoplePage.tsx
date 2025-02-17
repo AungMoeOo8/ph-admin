@@ -84,7 +84,7 @@ export default function EditPeoplePage() {
       filePath: string;
       file: File;
     }) => {
-      const response = await updateFile(filePath, file);
+      const response = await updateFile(filePath, "profile", file);
       if (!response.isSuccess) throw new Error(response.message);
       return response;
     },
@@ -107,17 +107,13 @@ export default function EditPeoplePage() {
   });
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
-    console.log(person);
     if (uploadImage.length > 0) {
-      // const imageUrl = person.image.slice(person.image.indexOf("/2024"));
       if (person.image != "") {
-        const filePath = person.image.slice(person.image.indexOf("profile/"));
 
         await updateFileMutation.mutateAsync(
-          { filePath, file: uploadImage[0] },
+          { filePath: person.image, file: uploadImage[0] },
           {
             onSuccess(data) {
-              console.log(data.url)
               person.image = data.url!;
             },
             onError: () => {

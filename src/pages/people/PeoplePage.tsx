@@ -150,10 +150,7 @@ export default function PeoplePage() {
                     <IconButton
                       colorPalette={"red"}
                       onClick={async () => {
-                        const filePath = person.image.slice(
-                          person.image.indexOf("profile/")
-                        );
-                        await handleDeleteBtn(person.id, filePath);
+                        await handleDeleteBtn(person.id, person.image);
                       }}
                     >
                       <LuTrash />
