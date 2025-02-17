@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/number-input";
 import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
-import { CourseProps, createCourse } from "@/features/supabase/course.service";
+import { CourseProps, createCourse } from "@/features/wordpress/course.service";
 
 export default function AddCoursePage() {
   const navigate = useNavigate();

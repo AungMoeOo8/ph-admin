@@ -3,7 +3,7 @@ import {
   deleteActivity,
   getActivities,
 } from "@/features/supabase/activity.service";
-import { deleteFile } from "@/features/supabase/upload.service";
+import { deleteFile } from "@/features/wordpress/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import { queryClient } from "@/main";
 import {

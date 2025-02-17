@@ -14,12 +14,8 @@ import {
 } from "@/components/ui/number-input";
 import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
-import {
-  getPersonById,
-  PersonProps,
-  updatePerson,
-} from "@/features/supabase/people.service";
-import { updateFile, uploadFile } from "@/features/supabase/upload.service";
+import { getPersonById, PersonProps, updatePerson } from "@/features/wordpress/people.service";
+import { updateFile, uploadFile } from "@/features/wordpress/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
   Box,

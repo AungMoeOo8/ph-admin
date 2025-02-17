@@ -34,7 +34,7 @@ import {
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { useMutation } from "@tanstack/react-query";
-import { createPerson, PersonProps } from "@/features/supabase/people.service";
+import { createPerson, PersonProps } from "@/features/wordpress/people.service";
 
 const positons = createListCollection({
   items: [
@@ -65,7 +65,7 @@ export default function AddPeoplePage() {
 
   const uploadFileMutation = useMutation({
     mutationFn: async (file: File) => {
-      const response = await uploadFile(file);
+      const response = await uploadFile("profile", file);
       if (!response.isSuccess) throw new Error(response.message);
       return response;
     },

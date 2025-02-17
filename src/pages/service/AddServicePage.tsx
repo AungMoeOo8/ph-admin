@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { toaster } from "@/components/ui/toaster";
 import { useMutation } from "@tanstack/react-query";
-import { createService, ServiceProps } from "@/features/supabase/service.service";
+import { createService, ServiceProps } from "@/features/wordpress/service.service";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({

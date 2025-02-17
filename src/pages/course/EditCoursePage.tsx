@@ -10,7 +10,7 @@ import {
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
-import { CourseProps, getCourseById, updateCourse } from "@/features/supabase/course.service";
+import { CourseProps, getCourseById, updateCourse } from "@/features/wordpress/course.service";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();

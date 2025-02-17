@@ -49,7 +49,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
-import { getServiceById, ServiceProps, updateService } from "@/features/supabase/service.service";
+import { getServiceById, ServiceProps, updateService } from "@/features/wordpress/service.service";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({

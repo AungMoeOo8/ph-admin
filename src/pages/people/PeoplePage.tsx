@@ -1,6 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import { deletePerson, getPeople } from "@/features/supabase/people.service";
-import { deleteFile } from "@/features/supabase/upload.service";
+import { deletePerson, getPeople } from "@/features/wordpress/people.service";
+import { deleteFile } from "@/features/wordpress/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import { queryClient } from "@/main";
 import {
@@ -46,7 +46,7 @@ export default function PeoplePage() {
   });
 
   async function handleDeleteBtn(id: string, filePath: string) {
-    deleteFileMutation.mutateAsync(filePath, {
+    await deleteFileMutation.mutateAsync(filePath, {
       onError: () => {
         toaster.create({
           type: "error",
@@ -56,7 +56,7 @@ export default function PeoplePage() {
       },
     });
 
-    deletePersonMutation.mutateAsync(id, {
+    await deletePersonMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
         toaster.create({
           type: "success",

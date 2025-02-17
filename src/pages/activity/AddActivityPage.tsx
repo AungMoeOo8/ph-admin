@@ -17,11 +17,11 @@ import { LuUpload } from "react-icons/lu";
 import { useMemo, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { useMutation } from "@tanstack/react-query";
-import { uploadFile } from "@/features/supabase/upload.service";
 import {
   ActivityProps,
   createActivity,
 } from "@/features/supabase/activity.service";
+import { uploadFile } from "@/features/wordpress/upload.service";
 
 export default function AddActivityPage() {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import { toaster } from "@/components/ui/toaster";
-import { deleteService, getServices } from "@/features/supabase/service.service";
+import { deleteService, getServices } from "@/features/wordpress/service.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import { queryClient } from "@/main";
 import {
