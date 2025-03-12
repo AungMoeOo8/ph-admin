@@ -17,11 +17,11 @@ import { LuUpload } from "react-icons/lu";
 import { useMemo, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { useMutation } from "@tanstack/react-query";
+import { uploadFile } from "@/features/wordpress/upload.service";
 import {
   ActivityProps,
   createActivity,
-} from "@/features/supabase/activity.service";
-import { uploadFile } from "@/features/wordpress/upload.service";
+} from "@/features/wordpress/activity.service";
 
 export default function AddActivityPage() {
   const navigate = useNavigate();
@@ -73,6 +73,7 @@ export default function AddActivityPage() {
 
     activity.id = uuidv4();
     activity.imageUrl = response.url!;
+    console.log(activity);
     await createActivityMutation.mutateAsync(activity, {
       onError(error) {
         toaster.create({

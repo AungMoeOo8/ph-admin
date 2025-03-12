@@ -2,7 +2,6 @@ import { toaster } from "@/components/ui/toaster";
 import { deletePerson, getPeople } from "@/features/wordpress/people.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
-import { queryClient } from "@/main";
 import {
   Badge,
   Box,
@@ -14,11 +13,17 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
+import { Reorder } from "motion/react";
+import useDelayedAction from "@/hooks/useDelayedAction";
+import { useRef } from "react";
 
 export default function PeoplePage() {
+  const queryClient = useQueryClient();
+  const isFirstRender = useRef(true);
+
   const { data, isPending } = useOnceQuery({
     queryKey: ["people"],
     queryFn: async () => {
@@ -28,6 +33,29 @@ export default function PeoplePage() {
     },
     initialData: null,
   });
+
+  useDelayedAction(
+    () => {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+
+      const updatedData = data?.map((person, index) => {
+        person.indexNumber = index;
+        return person;
+      });
+      console.log(updatedData);
+
+      toaster.create({
+        title: "Saved",
+        description: "Reordered",
+        type: "success"
+      })
+    },
+    2000,
+    []
+  );
 
   const deleteFileMutation = useMutation({
     mutationFn: async (filePath: string) => {
@@ -90,76 +118,85 @@ export default function PeoplePage() {
         </Box>
       )}
       {data != null && (
-        <Table.Root size={"lg"}>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>No.</Table.ColumnHeader>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Position</Table.ColumnHeader>
-              <Table.ColumnHeader>Roles</Table.ColumnHeader>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader></Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data
-              .sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1))
-              .map((person, index) => (
-                <Table.Row key={person.id}>
-                  <Table.Cell>{index + 1}</Table.Cell>
+        <Reorder.Group
+          values={data}
+          onReorder={(prev) => {
+            queryClient.setQueryData(["people"], prev);
+          }}
+        >
+          <Table.Root size={"lg"}>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>No.</Table.ColumnHeader>
+                <Table.ColumnHeader>Name</Table.ColumnHeader>
+                <Table.ColumnHeader>Position</Table.ColumnHeader>
+                <Table.ColumnHeader>Roles</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader></Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {data
+                // .sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1))
+                .map((person, index) => (
+                  <Table.Row key={person.id} asChild>
+                    <Reorder.Item key={person.id} value={person} as="tr">
+                      <Table.Cell>{index + 1}</Table.Cell>
 
-                  <Table.Cell>{person.name}</Table.Cell>
+                      <Table.Cell>{person.name}</Table.Cell>
 
-                  <Table.Cell>
-                    {person.position == "PROFESSIONAL"
-                      ? "Professional"
-                      : "Member"}
-                  </Table.Cell>
+                      <Table.Cell>
+                        {person.position == "PROFESSIONAL"
+                          ? "Professional"
+                          : "Member"}
+                      </Table.Cell>
 
-                  <Table.Cell>
-                    <Flex gapX={2} fontSize={"sm"} w="fit-content">
-                      <For each={person.roles}>
-                        {(role, index) => (
-                          <Text key={index} display={"inline"}>
-                            {role},
-                          </Text>
-                        )}
-                      </For>
-                    </Flex>
-                  </Table.Cell>
+                      <Table.Cell>
+                        <Flex gapX={2} fontSize={"sm"} w="fit-content">
+                          <For each={person.roles}>
+                            {(role, index) => (
+                              <Text key={index} display={"inline"}>
+                                {role},
+                              </Text>
+                            )}
+                          </For>
+                        </Flex>
+                      </Table.Cell>
 
-                  <Table.Cell>
-                    <Badge
-                      size={"lg"}
-                      colorPalette={person.visibility ? "green" : "orange"}
-                    >
-                      {person.visibility ? "Public" : "Private"}
-                    </Badge>
-                  </Table.Cell>
+                      <Table.Cell>
+                        <Badge
+                          size={"lg"}
+                          colorPalette={person.visibility ? "green" : "orange"}
+                        >
+                          {person.visibility ? "Public" : "Private"}
+                        </Badge>
+                      </Table.Cell>
 
-                  <Table.Cell
-                    display={"flex"}
-                    justifyContent={"center"}
-                    gapX={2}
-                  >
-                    <IconButton asChild colorPalette={"cyan"}>
-                      <Link to={`/dashboard/people/${person.id}/edit`}>
-                        <LuPencil />
-                      </Link>
-                    </IconButton>
-                    <IconButton
-                      colorPalette={"red"}
-                      onClick={async () => {
-                        await handleDeleteBtn(person.id, person.image);
-                      }}
-                    >
-                      <LuTrash />
-                    </IconButton>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-          </Table.Body>
-        </Table.Root>
+                      <Table.Cell
+                        display={"flex"}
+                        justifyContent={"center"}
+                        gapX={2}
+                      >
+                        <IconButton asChild colorPalette={"cyan"}>
+                          <Link to={`/dashboard/people/${person.id}/edit`}>
+                            <LuPencil />
+                          </Link>
+                        </IconButton>
+                        <IconButton
+                          colorPalette={"red"}
+                          onClick={async () => {
+                            await handleDeleteBtn(person.id, person.image);
+                          }}
+                        >
+                          <LuTrash />
+                        </IconButton>
+                      </Table.Cell>
+                    </Reorder.Item>
+                  </Table.Row>
+                ))}
+            </Table.Body>
+          </Table.Root>
+        </Reorder.Group>
       )}
     </Stack>
   );
