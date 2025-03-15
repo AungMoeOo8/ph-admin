@@ -1,5 +1,5 @@
 import { toaster } from "@/components/ui/toaster";
-import { deletePerson, getPeople } from "@/features/wordpress/people.service";
+import { deletePerson, getPeople, reorderPeople } from "@/features/wordpress/people.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
@@ -29,13 +29,13 @@ export default function PeoplePage() {
     queryFn: async () => {
       const response = await getPeople();
       if (!response.isSuccess) throw new Error(response.message);
-      return response.data;
+      return response.data.sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1));
     },
     initialData: null,
   });
 
   useDelayedAction(
-    () => {
+    async () => {
       if (isFirstRender.current) {
         isFirstRender.current = false;
         return;
@@ -45,7 +45,8 @@ export default function PeoplePage() {
         person.indexNumber = index;
         return person;
       });
-      console.log(updatedData);
+      
+      await reorderPeople(updatedData!)
 
       toaster.create({
         title: "Saved",
