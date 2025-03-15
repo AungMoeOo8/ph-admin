@@ -14,7 +14,6 @@ export type PersonProps = {
 export async function getPeople() {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/people`)
     const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps[] };
-
     return data
 }
 
@@ -49,6 +48,19 @@ export async function updatePerson(id: string, person: PersonProps) {
 
 export async function deletePerson(id: string) {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/people/${id}`, { method: "DELETE" })
+    const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
+
+    return data;
+}
+
+export async function reorderPeople(people: PersonProps[]) {
+    const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/people/reorder`, {
+        method: "POST",
+        body: JSON.stringify(people),
+        headers: { "Content-Type": "application/json" }
+    })
+
+    console.log({ reorder: await res.json() })
     const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
 
     return data;
