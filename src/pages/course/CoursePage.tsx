@@ -1,6 +1,10 @@
 import { toaster } from "@/components/ui/toaster";
-import { deleteCourse } from "@/features/wordpress/course.service";
+import {
+  deleteCourse,
+  reorderCourses,
+} from "@/features/wordpress/course.service";
 import { useCoursesQuery } from "@/hooks/useCoursesQuery";
+import useDelayedAction from "@/hooks/useDelayedAction";
 import { queryClient } from "@/main";
 import {
   Badge,
@@ -13,11 +17,38 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
+import { Reorder } from "motion/react";
+import { useRef } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function CoursePage() {
   const { data, isPending } = useCoursesQuery();
+  const isFirstRender = useRef(true);
+
+  useDelayedAction(
+    async () => {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+
+      const updatedData = data?.map((course, index) => {
+        course.indexNumber = index;
+        return course;
+      });
+
+      await reorderCourses(updatedData!);
+
+      toaster.create({
+        title: "Saved",
+        description: "Reordered",
+        type: "success",
+      });
+    },
+    2000,
+    []
+  );
 
   const mutation = useMutation({
     mutationFn: async (id: string) => {
@@ -62,47 +93,60 @@ export default function CoursePage() {
         </Box>
       )}
       {data != null && (
-        <Table.Root size={"lg"}>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>No.</Table.ColumnHeader>
-              <Table.ColumnHeader>Title</Table.ColumnHeader>
-              <Table.ColumnHeader>Instructor</Table.ColumnHeader>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader></Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data.map((course, index) => (
-              <Table.Row key={course.id}>
-                <Table.Cell>{index + 1}</Table.Cell>
-                <Table.Cell>{course.title}</Table.Cell>
-                <Table.Cell>{course.instructor}</Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    size={"lg"}
-                    colorPalette={course.visibility ? "green" : "orange"}
-                  >
-                    {course.visibility ? "Public" : "Private"}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
-                  <IconButton asChild colorPalette={"cyan"}>
-                    <Link to={`/dashboard/course/${course.id}/edit`}>
-                      <LuPencil />
-                    </Link>
-                  </IconButton>
-                  <IconButton
-                    colorPalette={"red"}
-                    onClick={async () => await handleDeleteBtn(course.id)}
-                  >
-                    <LuTrash />
-                  </IconButton>
-                </Table.Cell>
+        <Reorder.Group
+          values={data}
+          onReorder={(prev) => {
+            queryClient.setQueryData(["courses"], prev);
+          }}
+        >
+          <Table.Root size={"lg"}>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>No.</Table.ColumnHeader>
+                <Table.ColumnHeader>Title</Table.ColumnHeader>
+                <Table.ColumnHeader>Instructor</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader></Table.ColumnHeader>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
+            </Table.Header>
+            <Table.Body>
+              {data.map((course, index) => (
+                <Table.Row key={course.id} asChild>
+                  <Reorder.Item key={index} value={course} as="tr">
+                    <Table.Cell>{index + 1}</Table.Cell>
+                    <Table.Cell>{course.title}</Table.Cell>
+                    <Table.Cell>{course.instructor}</Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        size={"lg"}
+                        colorPalette={course.visibility ? "green" : "orange"}
+                      >
+                        {course.visibility ? "Public" : "Private"}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell
+                      display={"flex"}
+                      justifyContent={"center"}
+                      gapX={2}
+                    >
+                      <IconButton asChild colorPalette={"cyan"}>
+                        <Link to={`/dashboard/course/${course.id}/edit`}>
+                          <LuPencil />
+                        </Link>
+                      </IconButton>
+                      <IconButton
+                        colorPalette={"red"}
+                        onClick={async () => await handleDeleteBtn(course.id)}
+                      >
+                        <LuTrash />
+                      </IconButton>
+                    </Table.Cell>
+                  </Reorder.Item>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Root>
+        </Reorder.Group>
       )}
     </Stack>
   );

@@ -53,3 +53,16 @@ export async function deleteCourse(id: string) {
 
     return data;
 }
+
+export async function reorderCourses(courses: CourseProps[]) {
+    const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course/reorder`, {
+        method: "POST",
+        body: JSON.stringify(courses),
+        headers: { "Content-Type": "application/json" }
+    })
+
+    console.log({ reorder: await res.json() })
+    const data = await res.json() as { isSuccess: boolean, message: string, data: CourseProps };
+
+    return data;
+}

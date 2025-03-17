@@ -1,7 +1,9 @@
 import { toaster } from "@/components/ui/toaster";
 import {
   deleteService,
+  reorderServices,
 } from "@/features/wordpress/service.service";
+import useDelayedAction from "@/hooks/useDelayedAction";
 import { useServicesQuery } from "@/hooks/useServicesQuery";
 import { queryClient } from "@/main";
 import {
@@ -15,12 +17,38 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
+import { Reorder } from "motion/react";
+import { useRef } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
-
 export default function ServicePage() {
   const { data, isPending } = useServicesQuery();
+  const isFirstRender = useRef(true);
+
+  useDelayedAction(
+    async () => {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+
+      const updatedData = data?.map((service, index) => {
+        service.indexNumber = index;
+        return service;
+      });
+
+      await reorderServices(updatedData!);
+
+      toaster.create({
+        title: "Saved",
+        description: "Reordered",
+        type: "success",
+      });
+    },
+    2000,
+    []
+  );
 
   const mutation = useMutation({
     mutationFn: async (id: string) => {
@@ -65,47 +93,60 @@ export default function ServicePage() {
         </Box>
       )}
       {data != null && (
-        <Table.Root size={"lg"}>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>No.</Table.ColumnHeader>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Provider</Table.ColumnHeader>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader></Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {data.map((service, index) => (
-              <Table.Row key={service.id}>
-                <Table.Cell>{index + 1}</Table.Cell>
-                <Table.Cell>{service.name}</Table.Cell>
-                <Table.Cell>{service.provider}</Table.Cell>
-                <Table.Cell>
-                  <Badge
-                    size={"lg"}
-                    colorPalette={service.visibility ? "green" : "orange"}
-                  >
-                    {service.visibility ? "Public" : "Private"}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell display={"flex"} justifyContent={"center"} gapX={2}>
-                  <IconButton asChild colorPalette={"cyan"}>
-                    <Link to={`/dashboard/service/${service.id}/edit`}>
-                      <LuPencil />
-                    </Link>
-                  </IconButton>
-                  <IconButton
-                    colorPalette={"red"}
-                    onClick={async () => await handleDeleteBtn(service.id)}
-                  >
-                    <LuTrash />
-                  </IconButton>
-                </Table.Cell>
+        <Reorder.Group
+          values={data}
+          onReorder={(prev) => {
+            queryClient.setQueryData(["services"], prev);
+          }}
+        >
+          <Table.Root size={"lg"}>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>No.</Table.ColumnHeader>
+                <Table.ColumnHeader>Name</Table.ColumnHeader>
+                <Table.ColumnHeader>Provider</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader></Table.ColumnHeader>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
+            </Table.Header>
+            <Table.Body>
+              {data.map((service, index) => (
+                <Table.Row key={service.id} asChild>
+                  <Reorder.Item key={index} value={service} as="tr">
+                    <Table.Cell>{index + 1}</Table.Cell>
+                    <Table.Cell>{service.name}</Table.Cell>
+                    <Table.Cell>{service.provider}</Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        size={"lg"}
+                        colorPalette={service.visibility ? "green" : "orange"}
+                      >
+                        {service.visibility ? "Public" : "Private"}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell
+                      display={"flex"}
+                      justifyContent={"center"}
+                      gapX={2}
+                    >
+                      <IconButton asChild colorPalette={"cyan"}>
+                        <Link to={`/dashboard/service/${service.id}/edit`}>
+                          <LuPencil />
+                        </Link>
+                      </IconButton>
+                      <IconButton
+                        colorPalette={"red"}
+                        onClick={async () => await handleDeleteBtn(service.id)}
+                      >
+                        <LuTrash />
+                      </IconButton>
+                    </Table.Cell>
+                  </Reorder.Item>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Root>
+        </Reorder.Group>
       )}
     </Stack>
   );

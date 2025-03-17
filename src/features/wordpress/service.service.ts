@@ -53,3 +53,16 @@ export async function deleteService(id: string) {
 
     return data;
 }
+
+export async function reorderServices(services: ServiceProps[]) {
+    const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service/reorder`, {
+        method: "POST",
+        body: JSON.stringify(services),
+        headers: { "Content-Type": "application/json" }
+    })
+
+    console.log({ reorder: await res.json() })
+    const data = await res.json() as { isSuccess: boolean, message: string, data: ServiceProps };
+
+    return data;
+}
