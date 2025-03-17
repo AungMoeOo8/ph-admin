@@ -1,7 +1,9 @@
 import { toaster } from "@/components/ui/toaster";
-import { deletePerson, getPeople, reorderPeople } from "@/features/wordpress/people.service";
+import {
+  deletePerson,
+  reorderPeople,
+} from "@/features/wordpress/people.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
   Badge,
   Box,
@@ -19,20 +21,13 @@ import { Link } from "react-router";
 import { Reorder } from "motion/react";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import { useRef } from "react";
+import { usePeopleQuery } from "@/hooks/usePeopleQuery";
 
 export default function PeoplePage() {
   const queryClient = useQueryClient();
   const isFirstRender = useRef(true);
 
-  const { data, isPending } = useOnceQuery({
-    queryKey: ["people"],
-    queryFn: async () => {
-      const response = await getPeople();
-      if (!response.isSuccess) throw new Error(response.message);
-      return response.data.sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1));
-    },
-    initialData: null,
-  });
+  const { data, isPending } = usePeopleQuery();
 
   useDelayedAction(
     async () => {
@@ -45,14 +40,14 @@ export default function PeoplePage() {
         person.indexNumber = index;
         return person;
       });
-      
-      await reorderPeople(updatedData!)
+
+      await reorderPeople(updatedData!);
 
       toaster.create({
         title: "Saved",
         description: "Reordered",
-        type: "success"
-      })
+        type: "success",
+      });
     },
     2000,
     []

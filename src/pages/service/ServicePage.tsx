@@ -1,6 +1,8 @@
 import { toaster } from "@/components/ui/toaster";
-import { deleteService, getServices } from "@/features/wordpress/service.service";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
+import {
+  deleteService,
+} from "@/features/wordpress/service.service";
+import { useServicesQuery } from "@/hooks/useServicesQuery";
 import { queryClient } from "@/main";
 import {
   Badge,
@@ -16,17 +18,9 @@ import { useMutation } from "@tanstack/react-query";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
-export default function ServicePage() {
 
-  const { data, isPending } = useOnceQuery({
-    queryKey: ["services"],
-    queryFn: async () => {
-      const response = await getServices();
-      if (!response.isSuccess) throw new Error(response.message);
-      return response.data;
-    },
-    initialData: null,
-  });
+export default function ServicePage() {
+  const { data, isPending } = useServicesQuery();
 
   const mutation = useMutation({
     mutationFn: async (id: string) => {

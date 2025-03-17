@@ -1,6 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import { deleteCourse, getCourses } from "@/features/wordpress/course.service";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
+import { deleteCourse } from "@/features/wordpress/course.service";
+import { useCoursesQuery } from "@/hooks/useCoursesQuery";
 import { queryClient } from "@/main";
 import {
   Badge,
@@ -17,15 +17,7 @@ import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function CoursePage() {
-  const { data, isPending } = useOnceQuery({
-    queryKey: ["courses"],
-    queryFn: async () => {
-      const response = await getCourses();
-      if (!response.isSuccess) throw new Error(response.message);
-      return response.data;
-    },
-    initialData: null,
-  });
+  const { data, isPending } = useCoursesQuery();
 
   const mutation = useMutation({
     mutationFn: async (id: string) => {
