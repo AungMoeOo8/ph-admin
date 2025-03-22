@@ -16,8 +16,17 @@ import {
   Text,
   Badge,
 } from "@chakra-ui/react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Reorder } from "motion/react";
 import { LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
@@ -28,13 +37,25 @@ function ActivityComp({
   activity: ActivityProps;
   handleDeleteBtn: (id: string, filePath: string) => Promise<void>;
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: activity.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <Box
-      key={activity.id}
+      ref={setNodeRef}
+      key={activity.indexNumber}
       position={"relative"}
       borderWidth={1}
       borderRadius={"lg"}
       overflow={"hidden"}
+      style={style}
+      {...attributes}
+      {...listeners}
     >
       <Image w={"auto"} h={150} src={activity.imageUrl} />
       <Flex>
@@ -64,6 +85,8 @@ function ActivityComp({
 
 export default function ActivityPage() {
   const queryClient = useQueryClient();
+
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const { data, isPending } = useOnceQuery({
     queryKey: ["activities"],
@@ -121,6 +144,26 @@ export default function ActivityPage() {
     });
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (active.id !== over!.id) {
+      queryClient.setQueryData<ActivityProps[]>(["activities"], (prev) => {
+        const oldIndex = parseInt(active.id.toString());
+        const newIndex = parseInt(over!.id.toString());
+
+        const newArr = arrayMove(prev!, oldIndex, newIndex).map(
+          (item, index) => {
+            item.indexNumber = index;
+            return item;
+          }
+        );
+
+        return newArr;
+      });
+    }
+  }
+
   return (
     <Stack gap="10" w={"full"}>
       <Flex>
@@ -135,27 +178,30 @@ export default function ActivityPage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      <Reorder.Group
-        values={data}
-        onReorder={(prev) => {
-          queryClient.setQueryData(["activities"], prev);
-        }}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
       >
-        {data != undefined && (
-          <SimpleGrid id="grid" columns={{ base: 1, sm: 2, lg: 4 }} gap={2}>
-            {data.map((activity, index) => (
-              <Reorder.Item key={index} value={activity}>
-                <ActivityComp
-                  activity={activity}
-                  handleDeleteBtn={() =>
-                    handleDeleteBtn(activity.id, activity.imageUrl)
-                  }
-                />
-              </Reorder.Item>
-            ))}
-          </SimpleGrid>
-        )}
-      </Reorder.Group>
+        <SortableContext items={data}>
+          {data != undefined && (
+            <SimpleGrid id="grid" columns={{ base: 1, sm: 2, lg: 4 }} gap={2}>
+              {data.map((activity, index) => {
+                activity.indexNumber = index;
+                return (
+                  <ActivityComp
+                    key={index}
+                    activity={activity}
+                    handleDeleteBtn={() =>
+                      handleDeleteBtn(activity.id, activity.imageUrl)
+                    }
+                  />
+                );
+              })}
+            </SimpleGrid>
+          )}
+        </SortableContext>
+      </DndContext>
     </Stack>
   );
 }
