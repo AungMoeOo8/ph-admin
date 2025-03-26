@@ -61,7 +61,6 @@ export async function reorderServices(services: ServiceProps[]) {
         headers: { "Content-Type": "application/json" }
     })
 
-    console.log({ reorder: await res.json() })
     const data = await res.json() as { isSuccess: boolean, message: string, data: ServiceProps };
 
     return data;

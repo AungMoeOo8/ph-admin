@@ -59,8 +59,7 @@ export async function reorderPeople(people: PersonProps[]) {
         body: JSON.stringify(people),
         headers: { "Content-Type": "application/json" }
     })
-
-    console.log({ reorder: await res.json() })
+    
     const data = await res.json() as { isSuccess: boolean, message: string, data: PersonProps };
 
     return data;

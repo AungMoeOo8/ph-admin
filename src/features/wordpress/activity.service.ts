@@ -9,7 +9,7 @@ export type ActivityProps = {
 
 export async function getActivities() {
     const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity`)
-    const data = await res.json() as { isSuccess: boolean, data: ActivityProps[] };
+    const data = await res.json() as { isSuccess: boolean, message: string, data: ActivityProps[] };
 
     return data
 }
