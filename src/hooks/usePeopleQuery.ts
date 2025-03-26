@@ -2,7 +2,7 @@ import { getPeople } from "@/features/wordpress/people.service";
 import { useOnceQuery } from "./useOnceQuery";
 
 export function usePeopleQuery() {
-    const { data, isPending } = useOnceQuery({
+    return useOnceQuery({
         queryKey: ["people"],
         queryFn: async () => {
             const response = await getPeople();
@@ -13,6 +13,4 @@ export function usePeopleQuery() {
         },
         initialData: null,
     });
-
-    return { data, isPending };
 }

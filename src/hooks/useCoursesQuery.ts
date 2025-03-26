@@ -2,7 +2,7 @@ import { getCourses } from "@/features/wordpress/course.service";
 import { useOnceQuery } from "./useOnceQuery";
 
 export function useCoursesQuery() {
-  const { data, isPending } = useOnceQuery({
+  return useOnceQuery({
     queryKey: ["courses"],
     queryFn: async () => {
       const response = await getCourses();
@@ -14,5 +14,4 @@ export function useCoursesQuery() {
     initialData: null,
   });
 
-  return { data, isPending };
 }

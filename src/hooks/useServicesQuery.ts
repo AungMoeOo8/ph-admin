@@ -2,7 +2,7 @@ import { getServices } from "@/features/wordpress/service.service";
 import { useOnceQuery } from "./useOnceQuery";
 
 export function useServicesQuery() {
-  const { data, isPending } = useOnceQuery({
+  return useOnceQuery({
     queryKey: ["services"],
     queryFn: async () => {
       const response = await getServices();
@@ -14,5 +14,4 @@ export function useServicesQuery() {
     initialData: null,
   });
 
-  return { data, isPending };
 }
