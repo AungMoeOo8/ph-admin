@@ -2,10 +2,9 @@ import { toaster } from "@/components/ui/toaster";
 import {
   ActivityProps,
   deleteActivity,
-  getActivities,
 } from "@/features/wordpress/activity.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
+import useDelayedAction from "@/hooks/useDelayedAction";
 import {
   Box,
   Button,
@@ -24,11 +23,19 @@ import {
   useSensors,
   DragEndEvent,
 } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  useSortable,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
+import { ErrorBoundary } from "react-error-boundary";
+import { useActivitiesQuery } from "@/hooks/useActivitiesQuery";
 
 function ActivityComp({
   activity,
@@ -38,7 +45,7 @@ function ActivityComp({
   handleDeleteBtn: (id: string, filePath: string) => Promise<void>;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: activity.id });
+    useSortable({ id: activity.indexNumber });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -66,7 +73,8 @@ function ActivityComp({
           size={"sm"}
           colorPalette={activity.visibility ? "green" : "orange"}
         >
-          {activity.visibility ? "Public" : "Private"}
+          {/* {activity.visibility ? "Public" : "Private"} */}
+          {activity.indexNumber}
         </Badge>
         <Button
           colorPalette={"red"}
@@ -85,18 +93,35 @@ function ActivityComp({
 
 export default function ActivityPage() {
   const queryClient = useQueryClient();
-
+  const isFirstRender = useRef(true);
   const sensors = useSensors(useSensor(PointerSensor));
 
-  const { data, isPending } = useOnceQuery({
-    queryKey: ["activities"],
-    queryFn: async () => {
-      const response = await getActivities();
-      if (!response.isSuccess) throw new Error("");
-      return response.data;
+  const { data, isPending } = useActivitiesQuery();
+
+  useDelayedAction(
+    async () => {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+
+      const updatedData = data?.map((person, index) => {
+        return { ...person, indexNumber: index };
+      });
+
+      console.log({ updatedData });
+
+      // await reorderPeople(updatedData!);
+
+      toaster.create({
+        title: "Saved",
+        description: "Reordered",
+        type: "success",
+      });
     },
-    initialData: [],
-  });
+    2000,
+    []
+  );
 
   const deleteFileMutation = useMutation({
     mutationFn: async (filePath: string) => {
@@ -149,14 +174,23 @@ export default function ActivityPage() {
 
     if (active.id !== over!.id) {
       queryClient.setQueryData<ActivityProps[]>(["activities"], (prev) => {
-        const oldIndex = parseInt(active.id.toString());
-        const newIndex = parseInt(over!.id.toString());
+        if (!prev) return prev;
 
-        const newArr = arrayMove(prev!, oldIndex, newIndex).map(
-          (item, index) => {
-            item.indexNumber = index;
-            return item;
-          }
+        const oldIndex = prev.findIndex(
+          (item) => item.indexNumber === Number(active.id)
+        );
+        const newIndex = prev.findIndex(
+          (item) => item.indexNumber === Number(over!.id)
+        );
+        console.log({ active, over });
+
+        if (oldIndex === -1 || newIndex === -1) return prev;
+
+        const newArr = arrayMove(prev, oldIndex, newIndex).map(
+          (item, index) => ({
+            ...item,
+            indexNumber: index, // This ensures correct order is always maintained
+          })
         );
 
         return newArr;
@@ -178,32 +212,34 @@ export default function ActivityPage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={data}>
-          {data != undefined && (
-            <SimpleGrid id="grid" columns={{ base: 1, sm: 2, lg: 4 }} gap={2}>
-              {data.map((activity, index) => {
-                activity.indexNumber = index;
-                return (
-                  <ActivityComp
-                    key={index}
-                    activity={activity}
-                    handleDeleteBtn={() =>
-                      handleDeleteBtn(activity.id, activity.imageUrl)
-                    }
-                  />
-                );
-              })}
-            </SimpleGrid>
-          )}
-        </SortableContext>
-      </DndContext>
+      <ErrorBoundary fallback={<div>Error</div>}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={data.map((activity) => activity.indexNumber)}
+            strategy={rectSortingStrategy}
+          >
+            {data != undefined && (
+              <SimpleGrid id="grid" columns={{ base: 1, sm: 2, lg: 4 }} gap={2}>
+                {data.map((activity, index) => {
+                  return (
+                    <ActivityComp
+                      key={index}
+                      activity={activity}
+                      handleDeleteBtn={() =>
+                        handleDeleteBtn(activity.id, activity.imageUrl)
+                      }
+                    />
+                  );
+                })}
+              </SimpleGrid>
+            )}
+          </SortableContext>
+        </DndContext>
+      </ErrorBoundary>
     </Stack>
   );
 }
-
-// .sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1))
