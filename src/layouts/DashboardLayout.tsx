@@ -18,6 +18,7 @@ import {
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
 import { logout } from "@/features/supabase/auth.service";
+import { ErrorBoundary } from "react-error-boundary";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people", icon: LuUsers },
@@ -90,7 +91,9 @@ export default function DashboardLayout() {
           </Box>
         </Box>
         <Box mr={{ base: "", lg: 4 }} p={4} w={"full"}>
-          <Outlet />
+          <ErrorBoundary fallback={<div>Page Error</div>}>
+            <Outlet />
+          </ErrorBoundary>
         </Box>
       </Container>
 
