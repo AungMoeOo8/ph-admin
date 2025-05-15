@@ -49,3 +49,15 @@ export async function deleteActivity(id: string) {
 
     return data;
 }
+
+export async function reorderActivity(people: ActivityProps[]) {
+    const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity/reorder`, {
+        method: "POST",
+        body: JSON.stringify(people),
+        headers: { "Content-Type": "application/json" }
+    })
+    
+    const data = await res.json() as { isSuccess: boolean, message: string, data: ActivityProps[] };
+
+    return data;
+}

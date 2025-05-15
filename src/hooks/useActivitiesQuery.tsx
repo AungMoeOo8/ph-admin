@@ -8,7 +8,7 @@ export function useActivitiesQuery() {
       const response = await getActivities();
       if (!response.isSuccess) throw new Error(response.message);
       return response.data.sort((a, b) =>
-        a.indexNumber > b.indexNumber ? 0 : -1
+        a.indexNumber > b.indexNumber ? 0 : -1,
       );
     },
     initialData: [],

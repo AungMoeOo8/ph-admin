@@ -2,6 +2,7 @@ import { toaster } from "@/components/ui/toaster";
 import {
   ActivityProps,
   deleteActivity,
+  reorderActivity,
 } from "@/features/wordpress/activity.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
 import useDelayedAction from "@/hooks/useDelayedAction";
@@ -55,7 +56,7 @@ function ActivityComp({
   return (
     <Box
       ref={setNodeRef}
-      key={activity.indexNumber}
+      key={activity.id}
       position={"relative"}
       borderWidth={1}
       borderRadius={"lg"}
@@ -105,13 +106,9 @@ export default function ActivityPage() {
         return;
       }
 
-      const updatedData = data?.map((person, index) => {
-        return { ...person, indexNumber: index };
-      });
+      console.log({ data });
 
-      console.log({ updatedData });
-
-      // await reorderPeople(updatedData!);
+      await reorderActivity(data);
 
       toaster.create({
         title: "Saved",
@@ -119,8 +116,8 @@ export default function ActivityPage() {
         type: "success",
       });
     },
-    2000,
-    []
+    1000,
+    [data],
   );
 
   const deleteFileMutation = useMutation({
@@ -173,26 +170,22 @@ export default function ActivityPage() {
     const { active, over } = event;
 
     if (active.id !== over!.id) {
-      queryClient.setQueryData<ActivityProps[]>(["activities"], (prev) => {
-        if (!prev) return prev;
 
-        const oldIndex = prev.findIndex(
-          (item) => item.indexNumber === Number(active.id)
-        );
-        const newIndex = prev.findIndex(
-          (item) => item.indexNumber === Number(over!.id)
-        );
-        console.log({ active, over });
+      const oldIndex = data?.findIndex(
+        (item) => item.indexNumber === Number(active.id)
+      );
+      const newIndex = data?.findIndex(
+        (item) => item.indexNumber === Number(over!.id)
+      );
 
-        if (oldIndex === -1 || newIndex === -1) return prev;
-
-        const newArr = arrayMove(prev, oldIndex, newIndex).map(
+      queryClient.setQueryData<ActivityProps[]>(["activities"], () => {
+        if (!data) return data;
+        const newArr = arrayMove(data, oldIndex!, newIndex!).map(
           (item, index) => ({
             ...item,
             indexNumber: index, // This ensures correct order is always maintained
           })
         );
-
         return newArr;
       });
     }
