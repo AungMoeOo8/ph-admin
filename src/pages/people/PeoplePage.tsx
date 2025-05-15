@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   Flex,
-  For,
   IconButton,
   Stack,
   Table,
@@ -49,7 +48,6 @@ export default function PeoplePage() {
         type: "success",
       });
     },
-    2000,
     []
   );
 
@@ -149,13 +147,7 @@ export default function PeoplePage() {
 
                       <Table.Cell>
                         <Flex gapX={2} fontSize={"sm"} w="fit-content">
-                          <For each={person.roles}>
-                            {(role, index) => (
-                              <Text key={index} display={"inline"}>
-                                {role},
-                              </Text>
-                            )}
-                          </For>
+                          {person.roles && person.roles[0]}
                         </Flex>
                       </Table.Cell>
 

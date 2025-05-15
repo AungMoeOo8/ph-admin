@@ -55,29 +55,29 @@ function ActivityComp({
 
   return (
     <Box
-      ref={setNodeRef}
       key={activity.id}
       position={"relative"}
       borderWidth={1}
       borderRadius={"lg"}
       overflow={"hidden"}
       style={style}
-      {...attributes}
-      {...listeners}
     >
       <Image w={"auto"} h={150} src={activity.imageUrl} />
       <Flex>
         <Badge
+          ref={setNodeRef}
+          {...attributes}
+          {...listeners}
           position={"absolute"}
           top={4}
           right={4}
           size={"sm"}
           colorPalette={activity.visibility ? "green" : "orange"}
         >
-          {/* {activity.visibility ? "Public" : "Private"} */}
-          {activity.indexNumber}
+          {activity.visibility ? "Public" : "Private"}
         </Badge>
         <Button
+          zIndex={50}
           colorPalette={"red"}
           variant={"ghost"}
           w={"full"}
@@ -99,26 +99,22 @@ export default function ActivityPage() {
 
   const { data, isPending } = useActivitiesQuery();
 
-  useDelayedAction(
-    async () => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
+  useDelayedAction(async () => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-      console.log({ data });
+    console.log({ data });
 
-      await reorderActivity(data);
+    await reorderActivity(data);
 
-      toaster.create({
-        title: "Saved",
-        description: "Reordered",
-        type: "success",
-      });
-    },
-    1000,
-    [data],
-  );
+    toaster.create({
+      title: "Saved",
+      description: "Reordered",
+      type: "success",
+    });
+  }, [data]);
 
   const deleteFileMutation = useMutation({
     mutationFn: async (filePath: string) => {
@@ -137,6 +133,7 @@ export default function ActivityPage() {
   });
 
   async function handleDeleteBtn(id: string, filePath: string) {
+    console.log("clicked");
     await deleteFileMutation.mutateAsync(filePath, {
       onError: () => {
         toaster.create({
@@ -170,7 +167,6 @@ export default function ActivityPage() {
     const { active, over } = event;
 
     if (active.id !== over!.id) {
-
       const oldIndex = data?.findIndex(
         (item) => item.indexNumber === Number(active.id)
       );
@@ -222,8 +218,8 @@ export default function ActivityPage() {
                     <ActivityComp
                       key={index}
                       activity={activity}
-                      handleDeleteBtn={() =>
-                        handleDeleteBtn(activity.id, activity.imageUrl)
+                      handleDeleteBtn={async () =>
+                        await handleDeleteBtn(activity.id, activity.imageUrl)
                       }
                     />
                   );

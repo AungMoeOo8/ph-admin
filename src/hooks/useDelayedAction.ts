@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-function useDelayedAction(action: () => void, delay: number, dependency: any) {
+function useDelayedAction(action: () => void, dependency: any) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -8,7 +8,7 @@ function useDelayedAction(action: () => void, delay: number, dependency: any) {
 
     timerRef.current = setTimeout(() => {
       action();
-    }, delay);
+    }, 1000);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);

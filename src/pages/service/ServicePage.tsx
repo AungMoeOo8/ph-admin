@@ -46,7 +46,6 @@ export default function ServicePage() {
         type: "success",
       });
     },
-    2000,
     []
   );
 

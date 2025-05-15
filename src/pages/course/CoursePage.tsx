@@ -46,7 +46,6 @@ export default function CoursePage() {
         type: "success",
       });
     },
-    2000,
     []
   );
 
