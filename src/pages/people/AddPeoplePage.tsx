@@ -11,7 +11,7 @@ import {
   Heading,
   Image,
   Input,
-  SelectContent, 
+  SelectContent,
   SelectItem,
   SelectRoot,
   SelectTrigger,
@@ -27,14 +27,14 @@ import {
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
 import { LuUpload } from "react-icons/lu";
-import { uploadFile } from "@/features/wordpress/upload.service";
 import { toaster } from "@/components/ui/toaster";
 import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
-import { useMutation } from "@tanstack/react-query";
-import { createPerson, PersonProps } from "@/features/wordpress/people.service";
+import { useFileUpload } from "@/hooks/file-upload";
+import { useCreatePerson } from "@/hooks/people";
+import { PersonProps } from "@/features/wordpress/people.service";
 
 const positons = createListCollection({
   items: [
@@ -63,21 +63,9 @@ export default function AddPeoplePage() {
   const [inputValue, setInputValue] = useState("");
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  const uploadFileMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const response = await uploadFile("profile", file);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const uploadFileMutation = useFileUpload("profile");
 
-  const createPersonMutation = useMutation({
-    mutationFn: async (person: PersonProps) => {
-      const response = await createPerson(person);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const createPersonMutation = useCreatePerson();
 
   const handleSaveBtn: SubmitHandler<PersonProps> = async (person) => {
     if (uploadImage.length > 0) {

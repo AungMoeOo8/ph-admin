@@ -14,8 +14,13 @@ import {
 } from "@/components/ui/number-input";
 import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
-import { getPersonById, PersonProps, updatePerson } from "@/features/wordpress/people.service";
-import { updateFile, uploadFile } from "@/features/wordpress/upload.service";
+import {
+  getPersonById,
+  PersonProps,
+} from "@/features/wordpress/people.service";
+import { updateFile } from "@/features/wordpress/upload.service";
+import { useFileUpload } from "@/hooks/file-upload";
+import { useUpdatePerson } from "@/hooks/people";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
   Box,
@@ -90,26 +95,13 @@ export default function EditPeoplePage() {
     },
   });
 
-  const uploadFileMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const response = await uploadFile("profile", file);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const uploadFileMutation = useFileUpload("profile");
 
-  const updatePersonMutation = useMutation({
-    mutationFn: async (person: PersonProps) => {
-      const response = await updatePerson(person.id, person);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const updatePersonMutation = useUpdatePerson()
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
     if (uploadImage.length > 0) {
       if (person.image != "") {
-
         await updateFileMutation.mutateAsync(
           { filePath: person.image, file: uploadImage[0] },
           {

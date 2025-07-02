@@ -10,9 +10,9 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
-import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
-import { CourseProps, createCourse } from "@/features/wordpress/course.service";
+import { CourseProps } from "@/features/wordpress/course.service";
+import { useCreateCourse } from "@/hooks/course";
 
 export default function AddCoursePage() {
   const navigate = useNavigate();
@@ -33,13 +33,7 @@ export default function AddCoursePage() {
 
   const [outlineInput, setOutlineInput] = useState("");
 
-  const createCourseMutation = useMutation({
-    mutationFn: async (course: CourseProps) => {
-      const response = await createCourse(course);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const createCourseMutation = useCreateCourse();
 
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
     course.id = uuidv4();

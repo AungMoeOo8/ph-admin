@@ -10,7 +10,11 @@ import {
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
-import { CourseProps, getCourseById, updateCourse } from "@/features/wordpress/course.service";
+import {
+  CourseProps,
+  getCourseById,
+} from "@/features/wordpress/course.service";
+import { useUpdateCourse } from "@/hooks/course";
 
 export default function EditCoursePage() {
   const { courseId } = useParams();
@@ -42,9 +46,11 @@ export default function EditCoursePage() {
 
   const [outlineInput, setOutlineInput] = useState("");
 
+  const updateCourseMutation = useUpdateCourse();
+
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
     if (!courseId) return;
-    await updateCourse(courseId, course);
+    await updateCourseMutation.mutateAsync(course);
     navigate("/dashboard/course", { replace: true });
   };
 

@@ -46,10 +46,13 @@ import {
   DialogRoot,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
 import { useOnceQuery } from "@/hooks/useOnceQuery";
-import { getServiceById, ServiceProps, updateService } from "@/features/wordpress/service.service";
+import {
+  getServiceById,
+  ServiceProps,
+} from "@/features/wordpress/service.service";
+import { useUpdateService } from "@/hooks/service";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -303,20 +306,14 @@ export default function EditPeoplePage() {
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (service: ServiceProps) => {
-      const response = await updateService(service.id, service);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const updateServiceMutation = useUpdateService();
 
   const { register, handleSubmit, control } = useForm<ServiceProps>({
     values: data,
   });
 
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
-    await mutation.mutateAsync(service, {
+    await updateServiceMutation.mutateAsync(service, {
       onSuccess: (response) => {
         toaster.create({
           type: "success",

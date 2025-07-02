@@ -16,12 +16,9 @@ import {
 import { LuUpload } from "react-icons/lu";
 import { useMemo, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
-import { useMutation } from "@tanstack/react-query";
-import { uploadFile } from "@/features/wordpress/upload.service";
-import {
-  ActivityProps,
-  createActivity,
-} from "@/features/wordpress/activity.service";
+import { ActivityProps } from "@/features/wordpress/activity.service";
+import { useFileUpload } from "@/hooks/file-upload";
+import { useCreateActivity } from "@/hooks/activity";
 
 export default function AddActivityPage() {
   const navigate = useNavigate();
@@ -44,21 +41,9 @@ export default function AddActivityPage() {
     return watch("imageUrl");
   }, [uploadImage, watch("imageUrl")]);
 
-  const uploadFileMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const response = await uploadFile("activity", file);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const uploadFileMutation = useFileUpload("activity");
 
-  const createActivityMutation = useMutation({
-    mutationFn: async (activity: ActivityProps) => {
-      const response = await createActivity(activity);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const createActivityMutation = useCreateActivity();
 
   const handleSaveBtn: SubmitHandler<ActivityProps> = async (activity) => {
     const response = await uploadFileMutation.mutateAsync(uploadImage[0], {

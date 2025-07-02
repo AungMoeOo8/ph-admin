@@ -1,6 +1,9 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "@/components/ui/number-input";
 import {
   Box,
   Button,
@@ -45,8 +48,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toaster } from "@/components/ui/toaster";
-import { useMutation } from "@tanstack/react-query";
-import { createService, ServiceProps } from "@/features/wordpress/service.service";
+import { ServiceProps } from "@/features/wordpress/service.service";
+import { useCreateService } from "@/hooks/service";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -248,7 +251,8 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
           </DialogHeader>
           <DialogBody>
             <p>
-              This action cannot be undone. This will remove your current fee infomations.
+              This action cannot be undone. This will remove your current fee
+              infomations.
             </p>
           </DialogBody>
           <DialogFooter>
@@ -289,18 +293,12 @@ export default function AddServicePage() {
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (service: ServiceProps) => {
-      const response = await createService(service);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const createServicemutation = useCreateService();
 
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
     service.id = uuidv4();
 
-    await mutation.mutateAsync(service, {
+    await createServicemutation.mutateAsync(service, {
       onSuccess: (response) => {
         toaster.create({
           type: "success",
@@ -315,7 +313,6 @@ export default function AddServicePage() {
         });
       },
     });
-    
   };
 
   return (

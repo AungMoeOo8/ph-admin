@@ -1,9 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import {
-  deleteCourse,
-  reorderCourses,
-} from "@/features/wordpress/course.service";
-import { useCoursesQuery } from "@/hooks/useCoursesQuery";
+import { reorderCourses } from "@/features/wordpress/course.service";
+import { useCoursesQuery, useDeleteCourse } from "@/hooks/course";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import { queryClient } from "@/main";
 import {
@@ -16,7 +13,6 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { useMutation } from "@tanstack/react-query";
 import { Reorder } from "motion/react";
 import { useRef } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
@@ -26,39 +22,30 @@ export default function CoursePage() {
   const { data, isPending } = useCoursesQuery();
   const isFirstRender = useRef(true);
 
-  useDelayedAction(
-    async () => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
+  useDelayedAction(async () => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-      const updatedData = data?.map((course, index) => {
-        course.indexNumber = index;
-        return course;
-      });
+    const updatedData = data?.map((course, index) => {
+      course.indexNumber = index;
+      return course;
+    });
 
-      await reorderCourses(updatedData!);
+    await reorderCourses(updatedData!);
 
-      toaster.create({
-        title: "Saved",
-        description: "Reordered",
-        type: "success",
-      });
-    },
-    []
-  );
+    toaster.create({
+      title: "Saved",
+      description: "Reordered",
+      type: "success",
+    });
+  }, []);
 
-  const mutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteCourse(id);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const deleteCoursemMutation = useDeleteCourse();
 
   async function handleDeleteBtn(id: string) {
-    mutation.mutate(id, {
+    await deleteCoursemMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
         toaster.create({
           type: "success",

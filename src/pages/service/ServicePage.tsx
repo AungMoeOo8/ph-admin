@@ -1,10 +1,7 @@
 import { toaster } from "@/components/ui/toaster";
-import {
-  deleteService,
-  reorderServices,
-} from "@/features/wordpress/service.service";
+import { reorderServices } from "@/features/wordpress/service.service";
+import { useDeleteService, useServicesQuery } from "@/hooks/service";
 import useDelayedAction from "@/hooks/useDelayedAction";
-import { useServicesQuery } from "@/hooks/useServicesQuery";
 import { queryClient } from "@/main";
 import {
   Badge,
@@ -16,7 +13,6 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { useMutation } from "@tanstack/react-query";
 import { Reorder } from "motion/react";
 import { useRef } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
@@ -26,39 +22,30 @@ export default function ServicePage() {
   const { data, isPending } = useServicesQuery();
   const isFirstRender = useRef(true);
 
-  useDelayedAction(
-    async () => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
+  useDelayedAction(async () => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-      const updatedData = data?.map((service, index) => {
-        service.indexNumber = index;
-        return service;
-      });
+    const updatedData = data?.map((service, index) => {
+      service.indexNumber = index;
+      return service;
+    });
 
-      await reorderServices(updatedData!);
+    await reorderServices(updatedData!);
 
-      toaster.create({
-        title: "Saved",
-        description: "Reordered",
-        type: "success",
-      });
-    },
-    []
-  );
+    toaster.create({
+      title: "Saved",
+      description: "Reordered",
+      type: "success",
+    });
+  }, []);
 
-  const mutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteService(id);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const deleteServiceMutation = useDeleteService();
 
   async function handleDeleteBtn(id: string) {
-    await mutation.mutateAsync(id, {
+    await deleteServiceMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
         toaster.create({
           type: "success",
@@ -91,7 +78,7 @@ export default function ServicePage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      {data != null && (
+      {data && (
         <Reorder.Group
           values={data}
           onReorder={(prev) => {

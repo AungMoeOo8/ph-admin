@@ -1,8 +1,5 @@
 import { toaster } from "@/components/ui/toaster";
-import {
-  deletePerson,
-  reorderPeople,
-} from "@/features/wordpress/people.service";
+import { reorderPeople } from "@/features/wordpress/people.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
 import {
   Badge,
@@ -20,7 +17,7 @@ import { Link } from "react-router";
 import { Reorder } from "motion/react";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import { useRef } from "react";
-import { usePeopleQuery } from "@/hooks/usePeopleQuery";
+import { useDeletePerson, usePeopleQuery } from "@/hooks/people";
 
 export default function PeoplePage() {
   const queryClient = useQueryClient();
@@ -28,28 +25,25 @@ export default function PeoplePage() {
 
   const { data, isPending } = usePeopleQuery();
 
-  useDelayedAction(
-    async () => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
+  useDelayedAction(async () => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-      const updatedData = data?.map((person, index) => {
-        person.indexNumber = index;
-        return person;
-      });
+    const updatedData = data?.map((person, index) => {
+      person.indexNumber = index;
+      return person;
+    });
 
-      await reorderPeople(updatedData!);
+    await reorderPeople(updatedData!);
 
-      toaster.create({
-        title: "Saved",
-        description: "Reordered",
-        type: "success",
-      });
-    },
-    []
-  );
+    toaster.create({
+      title: "Saved",
+      description: "Reordered",
+      type: "success",
+    });
+  }, []);
 
   const deleteFileMutation = useMutation({
     mutationFn: async (filePath: string) => {
@@ -59,13 +53,7 @@ export default function PeoplePage() {
     },
   });
 
-  const deletePersonMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deletePerson(id);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const deletePersonMutation = useDeletePerson();
 
   async function handleDeleteBtn(id: string, filePath: string) {
     await deleteFileMutation.mutateAsync(filePath, {

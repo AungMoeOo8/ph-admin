@@ -32,11 +32,11 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
 import { LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 import { ErrorBoundary } from "react-error-boundary";
-import { useActivitiesQuery } from "@/hooks/useActivitiesQuery";
+import { useActivitiesQuery } from "@/hooks/activity";
+import { useRef } from "react";
 
 function ActivityComp({
   activity,
@@ -94,26 +94,30 @@ function ActivityComp({
 
 export default function ActivityPage() {
   const queryClient = useQueryClient();
-  const isFirstRender = useRef(true);
+  const isOrderDirty = useRef(false);
   const sensors = useSensors(useSensor(PointerSensor));
 
   const { data, isPending } = useActivitiesQuery();
 
   useDelayedAction(async () => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    // if (isFirstRender.current) {
+    //   isFirstRender.current = false;
+    //   return;
+    // }
+    console.log(isOrderDirty);
+
+    if (isOrderDirty.current) {
+      // console.log({ data });
+
+      await reorderActivity(data);
+
+      toaster.create({
+        title: "Saved",
+        description: "Reordered",
+        type: "success",
+      });
+      isOrderDirty.current = false;
     }
-
-    console.log({ data });
-
-    await reorderActivity(data);
-
-    toaster.create({
-      title: "Saved",
-      description: "Reordered",
-      type: "success",
-    });
   }, [data]);
 
   const deleteFileMutation = useMutation({
@@ -182,6 +186,8 @@ export default function ActivityPage() {
             indexNumber: index, // This ensures correct order is always maintained
           })
         );
+
+        isOrderDirty.current = true;
         return newArr;
       });
     }
@@ -211,21 +217,19 @@ export default function ActivityPage() {
             items={data.map((activity) => activity.indexNumber)}
             strategy={rectSortingStrategy}
           >
-            {data != undefined && (
-              <SimpleGrid id="grid" columns={{ base: 1, sm: 2, lg: 4 }} gap={2}>
-                {data.map((activity, index) => {
-                  return (
-                    <ActivityComp
-                      key={index}
-                      activity={activity}
-                      handleDeleteBtn={async () =>
-                        await handleDeleteBtn(activity.id, activity.imageUrl)
-                      }
-                    />
-                  );
-                })}
-              </SimpleGrid>
-            )}
+            <SimpleGrid id="grid" columns={{ base: 1, sm: 2, lg: 4 }} gap={2}>
+              {data.map((activity, index) => {
+                return (
+                  <ActivityComp
+                    key={index}
+                    activity={activity}
+                    handleDeleteBtn={async () =>
+                      await handleDeleteBtn(activity.id, activity.imageUrl)
+                    }
+                  />
+                );
+              })}
+            </SimpleGrid>
           </SortableContext>
         </DndContext>
       </ErrorBoundary>
