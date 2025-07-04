@@ -1,18 +1,18 @@
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
-import { login } from "@/features/supabase/auth.service";
+import { login as loginRequest } from "@/features/wordpress/auth.service";
+import { useAuth } from "@/hooks/auth";
 import { Button, Center, Fieldset, Input } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
-import { useNavigate } from "react-router";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  function onEmailChange(e: ChangeEvent<HTMLInputElement>) {
-    setEmail(e.target.value);
+  function onUsernameChange(e: ChangeEvent<HTMLInputElement>) {
+    setUsername(e.target.value);
   }
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
@@ -20,13 +20,18 @@ export default function LoginPage() {
   }
 
   async function handleLogin() {
-    const response = await login(email, password);
+    const { data, isSuccess } = await loginRequest(username, password);
 
-    if (!response.isSuccess) {
-      alert("login failed.");
+    if (!isSuccess) {
+      return alert("login failed.");
     }
 
-    navigate("/dashboard/", { replace: false });
+    login({
+      id: data.id,
+      email: data.email,
+      name: data.name,
+      token: data.token,
+    });
   }
 
   return (
@@ -36,8 +41,8 @@ export default function LoginPage() {
           PH Admin
         </Fieldset.Legend>
         <Fieldset.Content>
-          <Field label="Email">
-            <Input onChange={onEmailChange} />
+          <Field label="Username">
+            <Input onChange={onUsernameChange} />
           </Field>
           <Field label="Password">
             <PasswordInput onChange={onPasswordChange} />

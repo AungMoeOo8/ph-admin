@@ -1,22 +1,19 @@
 import { useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router";
-// import { useAuthStateChange } from "./hooks/useAuthStateChange";
+import { Outlet } from "react-router";
+import { useAuth } from "./hooks/auth";
 
 export default function App() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  // const auth = useAuthStateChange();
+  const { isAuthenticated } = useAuth();
 
-  // useEffect(() => {
-
-  //   if (auth.session) {
-  //     if (location.pathname == "/login") {
-  //       navigate("/dashboard", { replace: true });
-  //     }
-  //   } else {
-  //     navigate("/login", { replace: true });
-  //   }
-  // }, [auth]);
+  useEffect(() => {
+    // if (!isAuthenticated) {
+    //   navigate("/login", { replace: true, flushSync: false });
+    //   return;
+    // }
+    // if (location.pathname === "/login") {
+    //   navigate("/dashboard/people", { replace: true });
+    // }
+  }, [isAuthenticated]);
 
   return <Outlet />;
 }

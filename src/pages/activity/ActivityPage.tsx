@@ -37,6 +37,7 @@ import { Link } from "react-router";
 import { ErrorBoundary } from "react-error-boundary";
 import { useActivitiesQuery } from "@/hooks/activity";
 import { useRef } from "react";
+import { LuGripVertical } from "react-icons/lu";
 
 function ActivityComp({
   activity,
@@ -71,10 +72,10 @@ function ActivityComp({
           position={"absolute"}
           top={4}
           right={4}
-          size={"sm"}
-          colorPalette={activity.visibility ? "green" : "orange"}
+          py={2}
+          colorPalette={"black"}
         >
-          {activity.visibility ? "Public" : "Private"}
+          <LuGripVertical size={24}/>
         </Badge>
         <Button
           zIndex={50}

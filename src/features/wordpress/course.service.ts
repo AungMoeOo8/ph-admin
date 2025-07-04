@@ -33,7 +33,10 @@ export async function createCourse(service: CourseProps) {
   const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course`, {
     method: "POST",
     body: JSON.stringify(service),
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Authorization: `Bearer ${getUserFromStorage()?.token}`,
+    },
   });
   const data: Response<CourseProps> = await res.json();
 
@@ -46,7 +49,10 @@ export async function updateCourse(id: string, service: CourseProps) {
     {
       method: "PATCH",
       body: JSON.stringify(service),
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${getToken()}`,
+      },
     }
   );
   const data: Response<CourseProps> = await res.json();
@@ -57,7 +63,13 @@ export async function updateCourse(id: string, service: CourseProps) {
 export async function deleteCourse(id: string) {
   const res = await fetch(
     `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course/${id}`,
-    { method: "DELETE" }
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${getToken()}`,
+      },
+    }
   );
   const data: Response<CourseProps> = await res.json();
 
@@ -70,7 +82,10 @@ export async function reorderCourses(courses: CourseProps[]) {
     {
       method: "POST",
       body: JSON.stringify(courses),
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${getToken()}`,
+      },
     }
   );
 

@@ -15,10 +15,11 @@ import {
   Heading,
   IconButton,
 } from "@chakra-ui/react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { NavLink, Outlet } from "react-router";
 import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
 // import { logout } from "@/features/supabase/auth.service";
 import { ErrorBoundary } from "react-error-boundary";
+import { useAuth } from "@/hooks/auth";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people", icon: LuUsers },
@@ -28,13 +29,10 @@ const navLinks = [
 ];
 
 export default function DashboardLayout() {
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   async function handleLogout() {
-    // const response = await logout();
-    // if (response.isSuccess) {
-    //   navigate("/", { replace: true });
-    // }
+    logout();
   }
 
   return (

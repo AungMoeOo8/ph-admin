@@ -56,7 +56,8 @@ export default function PeoplePage() {
   const deletePersonMutation = useDeletePerson();
 
   async function handleDeleteBtn(id: string, filePath: string) {
-    await deleteFileMutation.mutateAsync(filePath, {
+    if (filePath !== '') {
+      await deleteFileMutation.mutateAsync(filePath, {
       onError: () => {
         toaster.create({
           type: "error",
@@ -65,6 +66,7 @@ export default function PeoplePage() {
         return;
       },
     });
+    }
 
     await deletePersonMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
