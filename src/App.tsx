@@ -1,20 +1,24 @@
-import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router";
-import { useAuth } from "./hooks/auth";
+import { Outlet } from "react-router";
+import AuthProvider from "./hooks/auth";
+import { Provider } from "./components/ui/provider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "./components/ui/toaster.tsx";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+export const queryClient = new QueryClient();
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login", { replace: true, flushSync: false });
-      return;
-    }
-    if (location.pathname === "/login") {
-      navigate("/dashboard/people", { replace: true });
-    }
-  }, [isAuthenticated]);
+  return (
+    <Provider forcedTheme="light">
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <Outlet />
+          <Toaster />
 
-  return <Outlet />;
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </AuthProvider>
+    </Provider>
+  );
 }

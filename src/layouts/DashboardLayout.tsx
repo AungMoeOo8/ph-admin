@@ -15,24 +15,41 @@ import {
   Heading,
   IconButton,
 } from "@chakra-ui/react";
-import { NavLink, Outlet } from "react-router";
+import { LoaderFunction, NavLink, Outlet, redirect, useNavigate } from "react-router";
 import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
 // import { logout } from "@/features/supabase/auth.service";
 import { ErrorBoundary } from "react-error-boundary";
 import { useAuth } from "@/hooks/auth";
+import { getUserFromStorage } from "@/util";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people", icon: LuUsers },
-  { name: "Service", to: "/dashboard/service", icon: LuList },
-  { name: "Course", to: "/dashboard/course", icon: LuLibrary },
-  { name: "Activity", to: "/dashboard/activity", icon: LuImages },
+  { name: "Service", to: "/dashboard/services", icon: LuList },
+  { name: "Course", to: "/dashboard/courses", icon: LuLibrary },
+  { name: "Activity", to: "/dashboard/activities", icon: LuImages },
 ];
+
+export const dashboardLoader: LoaderFunction = ({ request }) => {
+  const user = getUserFromStorage();
+  if (!user) {
+    const url = new URL(request.url);
+
+    // Preserve the full path + query string
+    throw redirect(
+      `/login?from=${encodeURIComponent(url.pathname + url.search)}`
+    );
+  }
+
+  return null
+}
 
 export default function DashboardLayout() {
   const { logout } = useAuth();
+  const navigate = useNavigate()
 
   async function handleLogout() {
     logout();
+    navigate("/login", { replace: true });
   }
 
   return (
@@ -43,7 +60,7 @@ export default function DashboardLayout() {
         top={0}
         bg={"bg"}
         zIndex={20}
-        // borderBottomWidth={"thin"}
+      // borderBottomWidth={"thin"}
       >
         <Container as={Flex} py={4} justifyContent={"space-between"}>
           <Flex alignItems={"center"}>
@@ -64,7 +81,7 @@ export default function DashboardLayout() {
           flexBasis={280}
           p={2}
           display={{ base: "none", lg: "block" }}
-          // borderRightWidth={"thin"}
+        // borderRightWidth={"thin"}
         >
           <Box p={2} position={"sticky"} top={"80px"}>
             {navLinks.map((link, index) => (

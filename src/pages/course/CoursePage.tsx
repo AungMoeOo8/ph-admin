@@ -2,7 +2,6 @@ import { toaster } from "@/components/ui/toaster";
 import { reorderCourses } from "@/features/wordpress/course.service";
 import { useCoursesQuery, useDeleteCourse } from "@/hooks/course";
 import useDelayedAction from "@/hooks/useDelayedAction";
-import { queryClient } from "@/main";
 import {
   Badge,
   Box,
@@ -13,6 +12,7 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Reorder } from "motion/react";
 import { useRef } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
@@ -21,6 +21,7 @@ import { Link } from "react-router";
 export default function CoursePage() {
   const { data, isPending } = useCoursesQuery();
   const isFirstRender = useRef(true);
+  const qc = useQueryClient()
 
   useDelayedAction(async () => {
     if (isFirstRender.current) {
@@ -51,7 +52,7 @@ export default function CoursePage() {
           type: "success",
           description: "Deleting successful.",
         });
-        queryClient.setQueryData(["courses"], () =>
+        qc.setQueryData(["courses"], () =>
           data?.filter((x) => x.id !== id)
         );
       },
@@ -68,7 +69,7 @@ export default function CoursePage() {
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/dashboard/course/new"}>
+          <Link to={"/dashboard/courses/new"}>
             <LuPlus /> Add
           </Link>
         </Button>
@@ -82,7 +83,7 @@ export default function CoursePage() {
         <Reorder.Group
           values={data}
           onReorder={(prev) => {
-            queryClient.setQueryData(["courses"], prev);
+            qc.setQueryData(["courses"], prev);
           }}
         >
           <Table.Root size={"lg"}>
@@ -116,7 +117,7 @@ export default function CoursePage() {
                       gapX={2}
                     >
                       <IconButton asChild colorPalette={"cyan"}>
-                        <Link to={`/dashboard/course/${course.id}/edit`}>
+                        <Link to={`/dashboard/courses/${course.id}/edit`}>
                           <LuPencil />
                         </Link>
                       </IconButton>

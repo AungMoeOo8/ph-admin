@@ -198,7 +198,7 @@ export default function ActivityPage() {
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/dashboard/activity/new"}>
+          <Link to={"/dashboard/activities/new"}>
             <LuPlus /> Add
           </Link>
         </Button>

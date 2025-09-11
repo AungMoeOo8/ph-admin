@@ -2,7 +2,6 @@ import { toaster } from "@/components/ui/toaster";
 import { reorderServices } from "@/features/wordpress/service.service";
 import { useDeleteService, useServicesQuery } from "@/hooks/service";
 import useDelayedAction from "@/hooks/useDelayedAction";
-import { queryClient } from "@/main";
 import {
   Badge,
   Box,
@@ -13,6 +12,7 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Reorder } from "motion/react";
 import { useRef } from "react";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
@@ -21,6 +21,7 @@ import { Link } from "react-router";
 export default function ServicePage() {
   const { data, isPending } = useServicesQuery();
   const isFirstRender = useRef(true);
+  const qc = useQueryClient();
 
   useDelayedAction(async () => {
     if (isFirstRender.current) {
@@ -45,13 +46,14 @@ export default function ServicePage() {
   const deleteServiceMutation = useDeleteService();
 
   async function handleDeleteBtn(id: string) {
+
     await deleteServiceMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
         toaster.create({
           type: "success",
           description: "Deleting successful.",
         });
-        queryClient.setQueryData(["services"], () =>
+        qc.setQueryData(["services"], () =>
           data?.filter((x) => x.id !== id)
         );
       },
@@ -68,7 +70,7 @@ export default function ServicePage() {
     <Stack gap="10" w={"full"}>
       <Flex>
         <Button asChild>
-          <Link to={"/dashboard/service/new"}>
+          <Link to={"/dashboard/services/new"}>
             <LuPlus /> Add
           </Link>
         </Button>
@@ -82,7 +84,7 @@ export default function ServicePage() {
         <Reorder.Group
           values={data}
           onReorder={(prev) => {
-            queryClient.setQueryData(["services"], prev);
+            qc.setQueryData(["services"], prev);
           }}
         >
           <Table.Root size={"lg"}>
@@ -116,7 +118,7 @@ export default function ServicePage() {
                       gapX={2}
                     >
                       <IconButton asChild colorPalette={"cyan"}>
-                        <Link to={`/dashboard/service/${service.id}/edit`}>
+                        <Link to={`/dashboard/services/${service.id}/edit`}>
                           <LuPencil />
                         </Link>
                       </IconButton>

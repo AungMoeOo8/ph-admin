@@ -7,7 +7,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useNavigate } from "react-router";
 
 export type User = {
   id: number;
@@ -27,20 +26,17 @@ const AuthContext = createContext<AuthContextProps>(null);
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
 
   const isAuthenticated = useMemo(() => user !== null, [user]);
 
   function logout() {
     setUser(null);
     sessionStorage.removeItem("user");
-    navigate("/login", { replace: true });
   }
 
   function login(user: User) {
     setUser(user);
     setUserToStorage(user);
-    navigate("/dashboard/people", { replace: true });
   }
 
   useEffect(() => {
