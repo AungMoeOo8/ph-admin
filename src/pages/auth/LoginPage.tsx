@@ -50,7 +50,7 @@ export default function LoginPage() {
       token: data.token,
     });
 
-    const to = new URL(location.href).searchParams.get("from") || "/dashboard"
+    const to = new URL(location.href).searchParams.get("from") || "/dashboard/people"
 
     navigate(to, { replace: true });
   }

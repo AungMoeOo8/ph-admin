@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouteObject, RouterProvider } from "react-router";
+import { createBrowserRouter, LoaderFunction, redirect, RouteObject, RouterProvider } from "react-router";
 import DashboardLayout, { dashboardLoader } from "./layouts/DashboardLayout.tsx";
 import PeoplePage from "./pages/people/PeoplePage.tsx";
 import AddPeoplePage from "./pages/people/AddPeoplePage.tsx";
@@ -17,6 +17,7 @@ import ActivityPage from "./pages/activity/ActivityPage.tsx";
 import React from "react";
 import "./index.css";
 import { loginLoader } from "./pages/auth/LoginPage";
+import { getUserFromStorage } from "./util.ts";
 
 const LoginPage = React.lazy(() => import("./pages/auth/LoginPage"));
 
@@ -88,10 +89,26 @@ const ActivityRoutes: RouteObject = {
   ]
 }
 
+const HomePageLoader: LoaderFunction = () => {
+  const user = getUserFromStorage();
+  if (!user) {
+
+    throw redirect(
+      `/login`,
+    );
+  }
+
+  throw redirect("/dashboard/people");
+}
+
 const router = createBrowserRouter([
   {
     path: "/", Component: App,
     children: [
+      {
+        index: true,
+        loader: HomePageLoader,
+      },
       {
         path: "/login", Component: LoginPage,
         loader: loginLoader
