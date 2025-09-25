@@ -9,39 +9,17 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
   CourseProps,
-  getCourseById,
 } from "@/features/wordpress/course.service";
-import { useUpdateCourse } from "@/hooks/course";
+import { useGetCourseById, useUpdateCourse } from "@/hooks/course";
 
-export default function EditCoursePage() {
-  const { courseId } = useParams();
+function EditCourseForm(course: CourseProps) {
   const navigate = useNavigate();
-
-  const { data } = useOnceQuery({
-    queryKey: ["editCourse"],
-    queryFn: async () => {
-      const course = await getCourseById(courseId!);
-      course.data!.outlines = course.data!.outlines ?? [];
-      return course.data;
-    },
-    initialData: {
-      id: "",
-      title: "",
-      duration: "",
-      instructor: "",
-      guestLecturer: "",
-      outlines: [],
-      visibility: false,
-      indexNumber: 0,
-    },
-  });
 
   const { register, handleSubmit, control, getValues, setValue } =
     useForm<CourseProps>({
-      values: data,
+      values: course,
     });
 
   const [outlineInput, setOutlineInput] = useState("");
@@ -49,9 +27,9 @@ export default function EditCoursePage() {
   const updateCourseMutation = useUpdateCourse();
 
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
-    if (!courseId) return;
+    // if (!courseId) return;
     await updateCourseMutation.mutateAsync(course);
-    navigate("/dashboard/course", { replace: true });
+    navigate("/dashboard/courses", { replace: true });
   };
 
   const addOutline = () => {
@@ -153,4 +131,16 @@ export default function EditCoursePage() {
       </Fieldset.Root>
     </Box>
   );
+}
+
+export default function EditCoursePage() {
+  const { courseId } = useParams();
+
+  const { data: course, isLoading, error } = useGetCourseById(Number(courseId));
+
+  return <Box>
+    {isLoading && <div>Loading...</div>}
+    {error && <div>{error.message}</div>}
+    {course && <EditCourseForm {...course} />}
+  </Box>
 }

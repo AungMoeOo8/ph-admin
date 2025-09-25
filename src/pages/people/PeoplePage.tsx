@@ -1,5 +1,5 @@
 import { toaster } from "@/components/ui/toaster";
-import { reorderPeople } from "@/features/wordpress/people.service";
+import { reorderPersons } from "@/features/wordpress/people.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
 import {
   Badge,
@@ -17,13 +17,13 @@ import { Link } from "react-router";
 import { Reorder } from "motion/react";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import { useRef } from "react";
-import { useDeletePerson, usePeopleQuery } from "@/hooks/people";
+import { useDeletePerson, useGetAllPersons } from "@/hooks/people";
 
 export default function PeoplePage() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   const isFirstRender = useRef(true);
 
-  const { data, isPending } = usePeopleQuery();
+  const { data, isPending } = useGetAllPersons();
 
   useDelayedAction(async () => {
     if (isFirstRender.current) {
@@ -36,7 +36,7 @@ export default function PeoplePage() {
       return person;
     });
 
-    await reorderPeople(updatedData!);
+    await reorderPersons(updatedData!);
 
     toaster.create({
       title: "Saved",
@@ -55,18 +55,18 @@ export default function PeoplePage() {
 
   const deletePersonMutation = useDeletePerson();
 
-  async function handleDeleteBtn(id: string, filePath: string) {
-    if (filePath !== '') {
-      await deleteFileMutation.mutateAsync(filePath, {
-      onError: () => {
-        toaster.create({
-          type: "error",
-          description: "Deleting failed.",
-        });
-        return;
-      },
-    });
-    }
+  async function handleDeleteBtn(id: number, filePath: string) {
+    // if (filePath !== '') {
+    //   await deleteFileMutation.mutateAsync(filePath, {
+    //     onError: () => {
+    //       toaster.create({
+    //         type: "error",
+    //         description: "Deleting failed.",
+    //       });
+    //       return;
+    //     },
+    //   });
+    // }
 
     await deletePersonMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
@@ -74,9 +74,6 @@ export default function PeoplePage() {
           type: "success",
           description: "Deleting successful.",
         });
-        queryClient.setQueryData(["people"], () =>
-          data?.filter((x) => x.id !== id)
-        );
       },
       onError: () => {
         toaster.create({
@@ -101,11 +98,11 @@ export default function PeoplePage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      {data != null && (
+      {data && (
         <Reorder.Group
           values={data}
-          onReorder={(prev) => {
-            queryClient.setQueryData(["people"], prev);
+          onReorder={async (prev) => {
+            qc.setQueryData(["persons"], prev);
           }}
         >
           <Table.Root size={"lg"}>

@@ -49,7 +49,7 @@ export default function AddPeoplePage() {
   const { register, handleSubmit, control, getValues, setValue } =
     useForm<PersonProps>({
       defaultValues: {
-        id: "",
+        id: -1,
         name: "",
         position: "",
         roles: [],
@@ -83,13 +83,11 @@ export default function AddPeoplePage() {
       });
     }
 
-    person.id = uuidv4();
-
     await createPersonMutation.mutateAsync(person, {
       onSuccess: (data) => {
         toaster.create({
           type: "success",
-          description: data.message,
+          description: "Person saved.",
         });
         navigate("/dashboard/people", { replace: true });
       },
@@ -146,7 +144,7 @@ export default function AddPeoplePage() {
                         <SelectItem
                           item={postion}
                           key={postion.value}
-                          // defaultChecked
+                        // defaultChecked
                         >
                           {postion.label}
                         </SelectItem>

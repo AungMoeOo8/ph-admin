@@ -15,13 +15,11 @@ import {
 import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
 import {
-  getPersonById,
   PersonProps,
 } from "@/features/wordpress/people.service";
 import { updateFile } from "@/features/wordpress/upload.service";
 import { useFileUpload } from "@/hooks/file-upload";
-import { useUpdatePerson } from "@/hooks/people";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
+import { useGetPersonById, useUpdatePerson } from "@/hooks/people";
 import {
   Box,
   createListCollection,
@@ -51,31 +49,13 @@ const positons = createListCollection({
   ],
 });
 
-export default function EditPeoplePage() {
-  const { personId } = useParams();
-  const navigate = useNavigate();
+function EditPersonForm(person: PersonProps) {
 
-  const { data } = useOnceQuery({
-    queryKey: ["editPeople", personId],
-    queryFn: async () => {
-      const response = await getPersonById(personId!);
-      return response.data;
-    },
-    initialData: {
-      id: "",
-      name: "",
-      position: "",
-      roles: [],
-      image: "",
-      biography: "",
-      visibility: false,
-      indexNumber: 0,
-    },
-  });
+  const navigate = useNavigate();
 
   const { register, handleSubmit, control, watch, getValues, setValue } =
     useForm<PersonProps>({
-      values: { ...data!, roles: data?.roles ?? [] },
+      values: { ...person, roles: person.roles ?? [] },
     });
 
   const [inputValue, setInputValue] = useState("");
@@ -100,43 +80,43 @@ export default function EditPeoplePage() {
   const updatePersonMutation = useUpdatePerson()
 
   const savePerson: SubmitHandler<PersonProps> = async (person) => {
-    if (uploadImage.length > 0) {
-      if (person.image != "") {
-        await updateFileMutation.mutateAsync(
-          { filePath: person.image, file: uploadImage[0] },
-          {
-            onSuccess(data) {
-              person.image = data.url!;
-            },
-            onError: () => {
-              toaster.create({
-                type: "error",
-                description: "Image updating failed.",
-              });
-            },
-          }
-        );
-      } else {
-        await uploadFileMutation.mutateAsync(uploadImage[0], {
-          onSuccess: (data) => {
-            person.image = data.url!;
-          },
-          onError: (error) => {
-            toaster.create({
-              type: "error",
-              description: error.message,
-            });
-            return;
-          },
-        });
-      }
-    }
+    // if (uploadImage.length > 0) {
+    //   if (person.image != "") {
+    //     await updateFileMutation.mutateAsync(
+    //       { filePath: person.image, file: uploadImage[0] },
+    //       {
+    //         onSuccess(data) {
+    //           person.image = data.url!;
+    //         },
+    //         onError: () => {
+    //           toaster.create({
+    //             type: "error",
+    //             description: "Image updating failed.",
+    //           });
+    //         },
+    //       }
+    //     );
+    //   } else {
+    //     await uploadFileMutation.mutateAsync(uploadImage[0], {
+    //       onSuccess: (data) => {
+    //         person.image = data.url!;
+    //       },
+    //       onError: (error) => {
+    //         toaster.create({
+    //           type: "error",
+    //           description: error.message,
+    //         });
+    //         return;
+    //       },
+    //     });
+    //   }
+    // }
 
     await updatePersonMutation.mutateAsync(person, {
       onSuccess: (data) => {
         toaster.create({
           type: "success",
-          description: data.message,
+          description: "Person updated.",
         });
         navigate("/dashboard/people", { replace: true });
       },
@@ -171,8 +151,10 @@ export default function EditPeoplePage() {
     return watch("image");
   }, [uploadImage, watch("image")]);
 
+
+
   return (
-    <Box>
+    <>
       <Fieldset.Root>
         <Heading size="2xl">Edit person</Heading>
         <Flex gap={4}>
@@ -314,6 +296,19 @@ export default function EditPeoplePage() {
 
         <Button onClick={handleSubmit(savePerson)}>Save changes</Button>
       </Fieldset.Root>
-    </Box>
+    </>
   );
+}
+
+export default function EditPeoplePage() {
+  const { personId } = useParams();
+
+
+  const { data: person, isLoading, error } = useGetPersonById(Number(personId))
+
+  return <Box>
+    {isLoading && <div>Loading...</div>}
+    {error && <div>{error.message}</div>}
+    {person && <EditPersonForm {...person} />}
+  </Box>
 }

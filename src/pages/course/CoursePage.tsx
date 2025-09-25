@@ -1,6 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import { reorderCourses } from "@/features/wordpress/course.service";
-import { useCoursesQuery, useDeleteCourse } from "@/hooks/course";
+import { CourseProps, reorderCourses } from "@/features/wordpress/course.service";
+import { useDeleteCourse, useGetAllCourses } from "@/hooks/course";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import {
   Badge,
@@ -19,7 +19,7 @@ import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function CoursePage() {
-  const { data, isPending } = useCoursesQuery();
+  const { data, isPending } = useGetAllCourses();
   const isFirstRender = useRef(true);
   const qc = useQueryClient()
 
@@ -29,7 +29,7 @@ export default function CoursePage() {
       return;
     }
 
-    const updatedData = data?.map((course, index) => {
+    const updatedData = data!.map((course, index) => {
       course.indexNumber = index;
       return course;
     });
@@ -41,11 +41,17 @@ export default function CoursePage() {
       description: "Reordered",
       type: "success",
     });
+
+
   }, []);
+
+  async function handleOnReorder(courses: CourseProps[]) {
+    qc.setQueryData(["courses"], courses);
+  }
 
   const deleteCoursemMutation = useDeleteCourse();
 
-  async function handleDeleteBtn(id: string) {
+  async function handleDeleteBtn(id: number) {
     await deleteCoursemMutation.mutateAsync(id, {
       onSuccess: (_, id) => {
         toaster.create({
@@ -82,9 +88,7 @@ export default function CoursePage() {
       {data != null && (
         <Reorder.Group
           values={data}
-          onReorder={(prev) => {
-            qc.setQueryData(["courses"], prev);
-          }}
+          onReorder={handleOnReorder}
         >
           <Table.Root size={"lg"}>
             <Table.Header>

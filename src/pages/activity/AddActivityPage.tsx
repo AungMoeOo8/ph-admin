@@ -27,7 +27,7 @@ export default function AddActivityPage() {
 
   const { register, handleSubmit, control, watch } = useForm<ActivityProps>({
     defaultValues: {
-      id: "",
+      id: -1,
       imageUrl: "",
       visibility: false,
       indexNumber: 0,
@@ -41,25 +41,24 @@ export default function AddActivityPage() {
     return watch("imageUrl");
   }, [uploadImage, watch("imageUrl")]);
 
-  const uploadFileMutation = useFileUpload("activity");
+  // const uploadFileMutation = useFileUpload("activity");
 
-  const createActivityMutation = useCreateActivity();
+  const { mutateAsync } = useCreateActivity();
 
   const handleSaveBtn: SubmitHandler<ActivityProps> = async (activity) => {
-    const response = await uploadFileMutation.mutateAsync(uploadImage[0], {
-      onError: (error) => {
-        toaster.create({
-          type: "error",
-          description: error.message,
-        });
-        return;
-      },
-    });
+    // const response = await uploadFileMutation.mutateAsync(uploadImage[0], {
+    //   onError: (error) => {
+    //     toaster.create({
+    //       type: "error",
+    //       description: error.message,
+    //     });
+    //     return;
+    //   },
+    // });
 
-    activity.id = uuidv4();
-    activity.imageUrl = response.url!;
+    // activity.imageUrl = response.url!;
     console.log(activity);
-    await createActivityMutation.mutateAsync(activity, {
+    await mutateAsync({ activity, file: uploadImage[0] }, {
       onError(error) {
         toaster.create({
           type: "error",
@@ -69,7 +68,7 @@ export default function AddActivityPage() {
       },
     });
 
-    navigate("/dashboard/activity", { replace: true });
+    navigate("/dashboard/activities", { replace: true });
   };
 
   return (

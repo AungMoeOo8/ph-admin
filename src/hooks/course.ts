@@ -1,52 +1,43 @@
 import {
-  CourseProps,
   createCourse,
   deleteCourse,
+  getCourseById,
   getCourses,
   updateCourse,
 } from "@/features/wordpress/course.service";
-import { useOnceQuery } from "./useOnceQuery";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-export function useCoursesQuery() {
-  return useOnceQuery({
+export function useGetAllCourses() {
+  return useQuery({
     queryKey: ["courses"],
-    queryFn: async () => {
-      const response = await getCourses();
-      if (!response.isSuccess) throw new Error(response.message);
-      return response.data.sort((a, b) =>
-        a.indexNumber > b.indexNumber ? 0 : -1
-      );
-    },
-    initialData: null,
+    queryFn: getCourses,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   });
+}
+
+export function useGetCourseById(courseId: number) {
+  return useQuery({
+    queryKey: ["courses", courseId],
+    queryFn: async () => getCourseById(courseId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  })
 }
 
 export function useCreateCourse() {
   return useMutation({
-    mutationFn: async (course: CourseProps) => {
-      const response = await createCourse(course);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: createCourse
   });
 }
 export function useUpdateCourse() {
   return useMutation({
-    mutationFn: async (service: CourseProps) => {
-      const response = await updateCourse(service.id, service);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: updateCourse
   });
 }
 
 export function useDeleteCourse() {
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteCourse(id);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: deleteCourse
   });
 }

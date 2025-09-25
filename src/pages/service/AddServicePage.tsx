@@ -35,7 +35,6 @@ import {
   LuTrash2,
   LuX,
 } from "react-icons/lu";
-import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import {
@@ -145,7 +144,7 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
                     setFeeInputs((prev) => {
                       return {
                         type: prev.type,
-                        amount: parseFloat(e.target.value),
+                        amount: Number(e.target.value),
                         description: prev.description,
                       };
                     })
@@ -282,7 +281,7 @@ export default function AddServicePage() {
 
   const { register, handleSubmit, control } = useForm<ServiceProps>({
     defaultValues: {
-      id: "",
+      id: -1,
       provider: "",
       name: "",
       description: "",
@@ -296,15 +295,14 @@ export default function AddServicePage() {
   const createServicemutation = useCreateService();
 
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
-    service.id = uuidv4();
 
     await createServicemutation.mutateAsync(service, {
       onSuccess: (response) => {
         toaster.create({
           type: "success",
-          description: response.message,
+          description: "Service saved.",
         });
-        navigate("/dashboard/service", { replace: true });
+        navigate("/dashboard/services", { replace: true });
       },
       onError: (error) => {
         toaster.create({

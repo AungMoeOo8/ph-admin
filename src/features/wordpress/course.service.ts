@@ -1,9 +1,7 @@
-import { Response } from "../../types";
-
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type CourseProps = {
-  id: string;
+  id: number;
   title: string;
   duration: string;
   instructor: string;
@@ -14,55 +12,75 @@ export type CourseProps = {
 };
 
 export async function getCourses() {
-  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course`);
-  const data: Response<CourseProps[]> = await res.json();
+  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses`);
 
-  return data;
-}
+  if (!res.ok) {
+    if (res.status === 404) throw new Error("Data not found.");
+    throw new Error("Internal server error")
+  }
 
-export async function getCourseById(id: string) {
-  const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course/${id}`
+  const data: CourseProps[] = await res.json();
+
+  return data.sort((a, b) =>
+    a.indexNumber > b.indexNumber ? 0 : -1
   );
-  const data: Response<CourseProps> = await res.json();
+}
+
+export async function getCourseById(id: number) {
+  const res = await fetch(
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${id}`
+  );
+
+  if (!res.ok) {
+    if (res.status === 404) throw new Error("Data not found.");
+    throw new Error("Internal server error")
+  }
+
+  const data: CourseProps = await res.json();
 
   return data;
 }
 
-export async function createCourse(service: CourseProps) {
-  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course`, {
+export async function createCourse(course: CourseProps) {
+  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses`, {
     method: "POST",
-    body: JSON.stringify(service),
+    body: JSON.stringify(course),
     headers: {
       "Content-Type": "application/json",
       // Authorization: `Bearer ${getUserFromStorage()?.token}`,
     },
   });
-  const data: Response<CourseProps> = await res.json();
+
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: { id: number } = await res.json();
 
   return data;
 }
 
-export async function updateCourse(id: string, service: CourseProps) {
+export async function updateCourse(course: CourseProps) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course/${id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${course.id}`,
     {
-      method: "PATCH",
-      body: JSON.stringify(service),
+      method: "PUT",
+      body: JSON.stringify(course),
       headers: {
         "Content-Type": "application/json",
         // Authorization: `Bearer ${getToken()}`,
       },
     }
   );
-  const data: Response<CourseProps> = await res.json();
+
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: { id: number } = await res.json();
 
   return data;
 }
 
-export async function deleteCourse(id: string) {
+export async function deleteCourse(id: number) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course/${id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${id}`,
     {
       method: "DELETE",
       headers: {
@@ -71,14 +89,17 @@ export async function deleteCourse(id: string) {
       },
     }
   );
-  const data: Response<CourseProps> = await res.json();
+
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: { id: number } = await res.json();
 
   return data;
 }
 
 export async function reorderCourses(courses: CourseProps[]) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/course/reorder`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/reorder`,
     {
       method: "POST",
       body: JSON.stringify(courses),
@@ -89,7 +110,9 @@ export async function reorderCourses(courses: CourseProps[]) {
     }
   );
 
-  const data: Response<CourseProps[]> = await res.json();
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: CourseProps[] = await res.json();
 
   return data;
 }

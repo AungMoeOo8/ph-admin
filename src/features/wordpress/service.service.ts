@@ -1,9 +1,7 @@
-import { Response } from "../../types";
-
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type ServiceProps = {
-  id: string;
+  id: number;
   provider: string;
   name: string;
   description: string;
@@ -14,62 +12,82 @@ export type ServiceProps = {
 };
 
 export async function getServices() {
-  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service`);
-  const data: Response<ServiceProps[]> = await res.json();
+  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/services`);
 
-  return data;
+  if (!res.ok) {
+    if (res.status === 404) throw new Error("Data not found.");
+    throw new Error("Internal server error")
+  }
+
+  const data: ServiceProps[] = await res.json();
+
+  return data.sort((a, b) =>
+    a.indexNumber > b.indexNumber ? 0 : -1
+  );
 }
 
-export async function getServiceById(id: string) {
+export async function getServiceById(id: number) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service/${id}`
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/${id}`
   );
-  const data: Response<ServiceProps> = await res.json();
+
+  if (!res.ok) {
+    if (res.status === 404) throw new Error("Data not found.");
+    throw new Error("Internal server error")
+  }
+
+  const data: ServiceProps = await res.json();
 
   return data;
 }
 
 export async function createService(service: ServiceProps) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services`,
     {
       method: "POST",
       body: JSON.stringify(service),
       headers: { "Content-Type": "application/json" },
     }
   );
-  const data: Response<ServiceProps> = await res.json();
+
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: ServiceProps = await res.json();
 
   return data;
 }
 
-export async function updateService(id: string, service: ServiceProps) {
+export async function updateService(service: ServiceProps) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service/${id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/${service.id}`,
     {
-      method: "PATCH",
+      method: "PUT",
       body: JSON.stringify(service),
       headers: { "Content-Type": "application/json" },
     }
   );
-  const data: Response<ServiceProps> = await res.json();
+
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: ServiceProps = await res.json();
 
   return data;
 }
 
-export async function deleteService(id: string) {
+export async function deleteService(id: number) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service/${id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/${id}`,
     { method: "DELETE" }
   );
-  const data: Response<ServiceProps> = await res.json();
+  const data: ServiceProps = await res.json();
 
   return data;
 }
 
 export async function reorderServices(services: ServiceProps[]) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/service/reorder`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/reorder`,
     {
       method: "POST",
       body: JSON.stringify(services),
@@ -77,7 +95,9 @@ export async function reorderServices(services: ServiceProps[]) {
     }
   );
 
-  const data: Response<ServiceProps[]> = await res.json();
+  if (!res.ok) throw new Error("Internal server error");
+
+  const data: ServiceProps[] = await res.json();
 
   return data;
 }

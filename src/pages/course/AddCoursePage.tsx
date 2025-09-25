@@ -1,7 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { v4 as uuidv4 } from "uuid";
 import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -20,7 +19,7 @@ export default function AddCoursePage() {
   const { register, handleSubmit, control, getValues, setValue } =
     useForm<CourseProps>({
       defaultValues: {
-        id: "",
+        id: -1,
         title: "",
         duration: "",
         instructor: "",
@@ -36,14 +35,13 @@ export default function AddCoursePage() {
   const createCourseMutation = useCreateCourse();
 
   const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
-    course.id = uuidv4();
     await createCourseMutation.mutateAsync(course, {
       onSuccess: (data) => {
         toaster.create({
           type: "success",
-          description: data.message,
+          description: "Course saved.",
         });
-        navigate("/dashboard/course", { replace: true });
+        navigate("/dashboard/courses", { replace: true });
       },
       onError: (error) => {
         toaster.create({

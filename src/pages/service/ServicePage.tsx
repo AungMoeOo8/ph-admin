@@ -1,6 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
 import { reorderServices } from "@/features/wordpress/service.service";
-import { useDeleteService, useServicesQuery } from "@/hooks/service";
+import { useDeleteService, useGetAllServices } from "@/hooks/service";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import {
   Badge,
@@ -19,7 +19,7 @@ import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 
 export default function ServicePage() {
-  const { data, isPending } = useServicesQuery();
+  const { data, isPending } = useGetAllServices();
   const isFirstRender = useRef(true);
   const qc = useQueryClient();
 
@@ -45,7 +45,7 @@ export default function ServicePage() {
 
   const deleteServiceMutation = useDeleteService();
 
-  async function handleDeleteBtn(id: string) {
+  async function handleDeleteBtn(id: number) {
 
     await deleteServiceMutation.mutateAsync(id, {
       onSuccess: (_, id) => {

@@ -47,12 +47,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toaster } from "@/components/ui/toaster";
-import { useOnceQuery } from "@/hooks/useOnceQuery";
 import {
-  getServiceById,
   ServiceProps,
 } from "@/features/wordpress/service.service";
-import { useUpdateService } from "@/hooks/service";
+import { useGetServiceById, useUpdateService } from "@/hooks/service";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -152,7 +150,7 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
                     setFeeInputs((prev) => {
                       return {
                         type: prev.type,
-                        amount: parseFloat(e.target.value),
+                        amount: Number(e.target.value),
                         description: prev.description,
                       };
                     })
@@ -284,32 +282,12 @@ const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   );
 };
 
-export default function EditPeoplePage() {
+function EditServiceForm(service: ServiceProps) {
   const navigate = useNavigate();
-  const { serviceId } = useParams();
-
-  const { data } = useOnceQuery({
-    queryKey: ["editService"],
-    queryFn: async () => {
-      const response = await getServiceById(serviceId!);
-      return response.data;
-    },
-    initialData: {
-      id: "",
-      provider: "",
-      name: "",
-      description: "",
-      fees: [],
-      ending: "",
-      indexNumber: 0,
-      visibility: false,
-    },
-  });
-
   const updateServiceMutation = useUpdateService();
 
   const { register, handleSubmit, control } = useForm<ServiceProps>({
-    values: data,
+    defaultValues: service
   });
 
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
@@ -317,9 +295,9 @@ export default function EditPeoplePage() {
       onSuccess: (response) => {
         toaster.create({
           type: "success",
-          description: response.message,
+          description: "Service updated",
         });
-        navigate("/dashboard/service", { replace: true });
+        navigate("/dashboard/services", { replace: true });
       },
       onError: (error) => {
         toaster.create({
@@ -331,7 +309,7 @@ export default function EditPeoplePage() {
   };
 
   return (
-    <Box>
+    <>
       <Fieldset.Root>
         <Heading size={"2xl"}>Edit service</Heading>
         <Fieldset.Content>
@@ -378,6 +356,21 @@ export default function EditPeoplePage() {
 
         <Button onClick={handleSubmit(handleSaveBtn)}>Save changes</Button>
       </Fieldset.Root>
-    </Box>
+    </>
   );
+}
+
+export default function EditServicePage() {
+  const { serviceId } = useParams();
+
+  const { data: service, isLoading, error } = useGetServiceById(Number(serviceId))
+
+  return (
+    <Box>
+      {isLoading && <div>Loading...</div>}
+      {error && <div>{error.message}</div>}
+      {service && <EditServiceForm {...service} />}
+    </Box>
+  )
+
 }

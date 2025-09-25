@@ -1,53 +1,48 @@
 import {
   createService,
   deleteService,
+  getServiceById,
   getServices,
-  ServiceProps,
   updateService,
 } from "@/features/wordpress/service.service";
-import { useOnceQuery } from "./useOnceQuery";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-export function useServicesQuery() {
-  return useOnceQuery({
+export function useGetAllServices() {
+  return useQuery({
     queryKey: ["services"],
-    queryFn: async () => {
-      const response = await getServices();
-      if (!response.isSuccess) throw new Error(response.message);
-      return response.data.sort((a, b) =>
-        a.indexNumber > b.indexNumber ? 0 : -1
-      );
-    },
-    initialData: null,
+    queryFn: getServices,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+
+export function useGetServiceById(serviceId: number) {
+  return useQuery({
+    queryKey: [`services`, serviceId],
+    queryFn: async () => getServiceById(serviceId),
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }
 
 export function useCreateService() {
   return useMutation({
-    mutationFn: async (service: ServiceProps) => {
-      const response = await createService(service);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: createService
   });
 }
 
 export function useUpdateService() {
+  // const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (service: ServiceProps) => {
-      const response = await updateService(service.id, service);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: updateService,
+    // onSuccess: (service) => {
+    //   qc.invalidateQueries({ queryKey: ["services", service.id] })
+    // }
   });
 }
 
 export function useDeleteService() {
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteService(id);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: deleteService
   });
 }

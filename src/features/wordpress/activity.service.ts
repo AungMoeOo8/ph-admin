@@ -1,9 +1,7 @@
-import { Response } from "../../types";
-
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type ActivityProps = {
-  id: string;
+  id: number;
   imageUrl: string;
   visibility: boolean;
   indexNumber: number;
@@ -11,71 +9,79 @@ export type ActivityProps = {
 
 export async function getActivities() {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity`
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities`
   );
-  const data: Response<ActivityProps[]> = await res.json();
+  const data: ActivityProps[] = await res.json();
+
+  return data.sort((a, b) =>
+    a.indexNumber > b.indexNumber ? 0 : -1
+  ).map((item, index) => ({ ...item, indexNumber: index }));
+}
+
+export async function getActivityById(id: number) {
+  const res = await fetch(
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities/${id}`
+  );
+  const data: ActivityProps = await res.json();
 
   return data;
 }
 
-export async function getActivityById(id: string) {
-  const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity/${id}`
-  );
-  const data: Response<ActivityProps> = await res.json();
+export async function createActivity(activity: ActivityProps, file: File) {
 
-  return data;
-}
+  const formData = new FormData();
+  formData.append("image", file); // 👈 File object from <input type="file">
+  formData.append("visibility", activity.visibility ? "true" : "false");
+  formData.append("indexNumber", activity.indexNumber.toString());
 
-export async function createActivity(service: ActivityProps) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities`,
     {
       method: "POST",
-      body: JSON.stringify(service),
-      headers: { "Content-Type": "application/json" },
+      body: formData,
+      // headers: { "Content-Type": "application/json" },
     }
   );
-  const data: Response<ActivityProps> = await res.json();
+  const data: ActivityProps = await res.json();
 
   return data;
 }
 
 export async function updateActivity(id: string, service: ActivityProps) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity/${id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activity/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify(service),
       headers: { "Content-Type": "application/json" },
     }
   );
-  const data: Response<ActivityProps> = await res.json();
+  const data: ActivityProps = await res.json();
 
   return data;
 }
 
-export async function deleteActivity(id: string) {
+export async function deleteActivity(id: number) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity/${id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities/${id}`,
     { method: "DELETE" }
   );
-  const data: Response<ActivityProps> = await res.json();
+  const data: ActivityProps = await res.json();
 
   return data;
 }
 
-export async function reorderActivity(people: ActivityProps[]) {
+export async function reorderActivity(activities: ActivityProps[]) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/activity/reorder`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities/reorder`,
     {
       method: "POST",
-      body: JSON.stringify(people),
+      body: JSON.stringify(activities),
       headers: { "Content-Type": "application/json" },
     }
   );
 
-  const data: Response<ActivityProps[]> = await res.json();
+  const data: ActivityProps[] = await res.json();
 
   return data;
 }

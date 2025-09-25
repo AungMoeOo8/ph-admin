@@ -1,11 +1,9 @@
 import { toaster } from "@/components/ui/toaster";
 import {
   ActivityProps,
-  deleteActivity,
   reorderActivity,
 } from "@/features/wordpress/activity.service";
 import { deleteFile } from "@/features/wordpress/upload.service";
-import useDelayedAction from "@/hooks/useDelayedAction";
 import {
   Box,
   Button,
@@ -35,8 +33,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 import { ErrorBoundary } from "react-error-boundary";
-import { useActivitiesQuery } from "@/hooks/activity";
-import { useRef } from "react";
+import { useDeleteActivity, useGetAllActivities } from "@/hooks/activity";
 import { LuGripVertical } from "react-icons/lu";
 
 function ActivityComp({
@@ -44,10 +41,10 @@ function ActivityComp({
   handleDeleteBtn,
 }: {
   activity: ActivityProps;
-  handleDeleteBtn: (id: string, filePath: string) => Promise<void>;
+  handleDeleteBtn: (id: number, filePath: string) => Promise<void>;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: activity.indexNumber });
+    useSortable({ id: activity.indexNumber, data: activity });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -56,7 +53,6 @@ function ActivityComp({
 
   return (
     <Box
-      key={activity.id}
       position={"relative"}
       borderWidth={1}
       borderRadius={"lg"}
@@ -75,7 +71,7 @@ function ActivityComp({
           py={2}
           colorPalette={"black"}
         >
-          <LuGripVertical size={24}/>
+          <LuGripVertical size={24} />
         </Badge>
         <Button
           zIndex={50}
@@ -94,32 +90,10 @@ function ActivityComp({
 }
 
 export default function ActivityPage() {
-  const queryClient = useQueryClient();
-  const isOrderDirty = useRef(false);
+  const qc = useQueryClient();
   const sensors = useSensors(useSensor(PointerSensor));
 
-  const { data, isPending } = useActivitiesQuery();
-
-  useDelayedAction(async () => {
-    // if (isFirstRender.current) {
-    //   isFirstRender.current = false;
-    //   return;
-    // }
-    console.log(isOrderDirty);
-
-    if (isOrderDirty.current) {
-      // console.log({ data });
-
-      await reorderActivity(data);
-
-      toaster.create({
-        title: "Saved",
-        description: "Reordered",
-        type: "success",
-      });
-      isOrderDirty.current = false;
-    }
-  }, [data]);
+  const { data, isPending } = useGetAllActivities();
 
   const deleteFileMutation = useMutation({
     mutationFn: async (filePath: string) => {
@@ -129,16 +103,10 @@ export default function ActivityPage() {
     },
   });
 
-  const deleteActivityMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteActivity(id);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const { mutateAsync } = useDeleteActivity()
 
-  async function handleDeleteBtn(id: string, filePath: string) {
-    console.log("clicked");
+  async function handleDeleteBtn(id: number, filePath: string) {
+
     await deleteFileMutation.mutateAsync(filePath, {
       onError: () => {
         toaster.create({
@@ -149,15 +117,13 @@ export default function ActivityPage() {
       },
     });
 
-    await deleteActivityMutation.mutateAsync(id, {
-      onSuccess: (_, id) => {
+    await mutateAsync(id, {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Deleting successful.",
         });
-        queryClient.setQueryData(["activities"], () =>
-          data?.filter((x) => x.id !== id)
-        );
+        qc.invalidateQueries({ queryKey: ["activities"] })
       },
       onError: () => {
         toaster.create({
@@ -168,7 +134,7 @@ export default function ActivityPage() {
     });
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
     if (active.id !== over!.id) {
@@ -179,17 +145,21 @@ export default function ActivityPage() {
         (item) => item.indexNumber === Number(over!.id)
       );
 
-      queryClient.setQueryData<ActivityProps[]>(["activities"], () => {
-        if (!data) return data;
-        const newArr = arrayMove(data, oldIndex!, newIndex!).map(
-          (item, index) => ({
-            ...item,
-            indexNumber: index, // This ensures correct order is always maintained
-          })
-        );
+      const newArr = arrayMove(data!, oldIndex!, newIndex!).map(
+        (item, index) => ({
+          ...item,
+          indexNumber: index, // This ensures correct order is always maintained
+        })
+      );
 
-        isOrderDirty.current = true;
-        return newArr;
+      qc.setQueryData<ActivityProps[]>(["activities"], newArr);
+
+      await reorderActivity(newArr);
+
+      toaster.create({
+        title: "Saved",
+        description: "Reordered",
+        type: "success",
       });
     }
   }
@@ -208,7 +178,7 @@ export default function ActivityPage() {
           <Text>Loading...</Text>
         </Box>
       )}
-      <ErrorBoundary fallback={<div>Error</div>}>
+      {data && <ErrorBoundary fallback={<div>Error</div>}>
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -233,7 +203,7 @@ export default function ActivityPage() {
             </SimpleGrid>
           </SortableContext>
         </DndContext>
-      </ErrorBoundary>
+      </ErrorBoundary>}
     </Stack>
   );
 }

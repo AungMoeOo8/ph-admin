@@ -1,31 +1,30 @@
 import {
   ActivityProps,
   createActivity,
+  deleteActivity,
   getActivities,
 } from "@/features/wordpress/activity.service";
-import { useOnceQuery } from "./useOnceQuery";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export function useActivitiesQuery() {
-  return useOnceQuery({
+export function useGetAllActivities() {
+  return useQuery({
     queryKey: ["activities"],
-    queryFn: async () => {
-      const response = await getActivities();
-      if (!response.isSuccess) throw new Error(response.message);
-      return response.data.sort((a, b) =>
-        a.indexNumber > b.indexNumber ? 0 : -1
-      );
-    },
-    initialData: [],
+    queryFn: getActivities,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 }
 
 export function useCreateActivity() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (activity: ActivityProps) => {
-      const response = await createActivity(activity);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
+    mutationFn: async ({ activity, file }: { activity: ActivityProps, file: File }) => createActivity(activity, file),
+    onSuccess: async () => await qc.invalidateQueries({ queryKey: ["activities"] })
+  });
+}
+
+export function useDeleteActivity() {
+  return useMutation({
+    mutationFn: deleteActivity
   });
 }
