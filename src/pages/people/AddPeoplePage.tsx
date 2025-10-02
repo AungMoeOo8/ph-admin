@@ -1,7 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { v4 as uuidv4 } from "uuid";
 import {
   Box,
   Button,
@@ -32,9 +31,9 @@ import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
-import { useFileUpload } from "@/hooks/file-upload";
 import { useCreatePerson } from "@/hooks/people";
-import { PersonProps } from "@/features/wordpress/people.service";
+import { PersonSchema } from "@/features/wordpress/people.service";
+import z from "zod"
 
 const positons = createListCollection({
   items: [
@@ -47,44 +46,21 @@ export default function AddPeoplePage() {
   const navigate = useNavigate();
 
   const { register, handleSubmit, control, getValues, setValue } =
-    useForm<PersonProps>({
+    useForm<z.infer<typeof PersonSchema>>({
       defaultValues: {
-        id: -1,
-        name: "",
-        position: "",
-        roles: [],
-        image: "",
-        biography: "",
-        visibility: false,
-        indexNumber: 0,
-      },
+        roles: []
+      }
     });
 
   const [inputValue, setInputValue] = useState("");
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  const uploadFileMutation = useFileUpload("profile");
-
   const createPersonMutation = useCreatePerson();
 
-  const handleSaveBtn: SubmitHandler<PersonProps> = async (person) => {
-    if (uploadImage.length > 0) {
-      await uploadFileMutation.mutateAsync(uploadImage[0], {
-        onSuccess: (data) => {
-          person.image = data.url;
-        },
-        onError: () => {
-          toaster.create({
-            type: "error",
-            description: "Image upload failed.",
-          });
-          return;
-        },
-      });
-    }
-
+  const handleSaveBtn: SubmitHandler<z.infer<typeof PersonSchema>> = async (person) => {
+    person.image = uploadImage[0]
     await createPersonMutation.mutateAsync(person, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Person saved.",

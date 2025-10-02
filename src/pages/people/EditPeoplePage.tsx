@@ -16,9 +16,8 @@ import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
 import {
   PersonProps,
+  PersonSchema,
 } from "@/features/wordpress/people.service";
-import { updateFile } from "@/features/wordpress/upload.service";
-import { useFileUpload } from "@/hooks/file-upload";
 import { useGetPersonById, useUpdatePerson } from "@/hooks/people";
 import {
   Box,
@@ -36,11 +35,11 @@ import {
   SelectValueText,
   Textarea,
 } from "@chakra-ui/react";
-import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Control, Controller, SubmitHandler, useController, useForm } from "react-hook-form";
 import { LuFileUp } from "react-icons/lu";
 import { useNavigate, useParams } from "react-router";
+import z from "zod";
 
 const positons = createListCollection({
   items: [
@@ -49,71 +48,90 @@ const positons = createListCollection({
   ],
 });
 
+function RoleInput({ control }: { control: Control<z.infer<typeof PersonSchema>> }) {
+
+  const [inputValue, setInputValue] = useState("");
+
+  const { field } = useController({ control: control, name: "roles" })
+
+  const addRole = () => {
+    const roles = field.value;
+    if (inputValue.trim() && !roles.includes(inputValue.trim())) {
+      const updatedRoles = [...roles, inputValue.trim()];
+      field.onChange(updatedRoles);
+    }
+    setInputValue("");
+  };
+
+  const removeRole = (role: string) => {
+    const roles = field.value.filter((r) => r !== role);
+    field.onChange(roles);
+  };
+
+  return (
+    <>
+      <Controller
+        name="roles"
+        control={control}
+        render={({ field }) => (
+          <Box>
+            <For each={field.value}>
+              {(role, index) => (
+                <Tag
+                  key={index}
+                  size="lg"
+                  colorScheme="blue"
+                  borderRadius="full"
+                  m={1}
+                  closable
+                  onClick={() => removeRole(role)}
+                >
+                  {role}
+                </Tag>
+              )}
+            </For>
+          </Box>
+        )}
+      />
+      <Input
+        id="role-input"
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addRole();
+          }
+        }}
+      />
+    </>
+  )
+}
+
 function EditPersonForm(person: PersonProps) {
 
   const navigate = useNavigate();
 
-  const { register, handleSubmit, control, watch, getValues, setValue } =
-    useForm<PersonProps>({
-      values: { ...person, roles: person.roles ?? [] },
+  const { register, handleSubmit, control, watch } =
+    useForm<z.infer<typeof PersonSchema>>({
+      defaultValues: {
+        name: person.name,
+        position: person.position,
+        biography: person.biography,
+        roles: person.roles ?? [],
+        visibility: person.visibility,
+      },
     });
 
-  const [inputValue, setInputValue] = useState("");
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  const updateFileMutation = useMutation({
-    mutationFn: async ({
-      filePath,
-      file,
-    }: {
-      filePath: string;
-      file: File;
-    }) => {
-      const response = await updateFile(filePath, "profile", file);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
+  const updatePersonMutation = useUpdatePerson(person.id)
 
-  const uploadFileMutation = useFileUpload("profile");
-
-  const updatePersonMutation = useUpdatePerson()
-
-  const savePerson: SubmitHandler<PersonProps> = async (person) => {
-    // if (uploadImage.length > 0) {
-    //   if (person.image != "") {
-    //     await updateFileMutation.mutateAsync(
-    //       { filePath: person.image, file: uploadImage[0] },
-    //       {
-    //         onSuccess(data) {
-    //           person.image = data.url!;
-    //         },
-    //         onError: () => {
-    //           toaster.create({
-    //             type: "error",
-    //             description: "Image updating failed.",
-    //           });
-    //         },
-    //       }
-    //     );
-    //   } else {
-    //     await uploadFileMutation.mutateAsync(uploadImage[0], {
-    //       onSuccess: (data) => {
-    //         person.image = data.url!;
-    //       },
-    //       onError: (error) => {
-    //         toaster.create({
-    //           type: "error",
-    //           description: error.message,
-    //         });
-    //         return;
-    //       },
-    //     });
-    //   }
-    // }
-
+  const savePerson: SubmitHandler<z.infer<typeof PersonSchema>> = async (person) => {
+    person.image = uploadImage[0]
     await updatePersonMutation.mutateAsync(person, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Person updated.",
@@ -130,28 +148,15 @@ function EditPersonForm(person: PersonProps) {
     });
   };
 
-  const addRole = () => {
-    const roles = getValues("roles");
-    if (inputValue.trim() && !roles.includes(inputValue.trim())) {
-      const updatedRoles = [...roles, inputValue.trim()];
-      setValue("roles", updatedRoles);
-    }
-    setInputValue("");
-  };
-
-  const removeRole = (role: string) => {
-    const roles = getValues("roles").filter((r) => r !== role);
-    setValue("roles", roles);
-  };
-
   const previewImage = useMemo(() => {
     if (uploadImage.length > 0) {
       return URL.createObjectURL(uploadImage![0]);
     }
-    return watch("image");
+    if (watch("image")) {
+      return URL.createObjectURL(watch("image")!);
+    }
+    return person.image
   }, [uploadImage, watch("image")]);
-
-
 
   return (
     <>
@@ -194,41 +199,7 @@ function EditPersonForm(person: PersonProps) {
             </Field>
 
             <Field label="Roles">
-              <Controller
-                name="roles"
-                control={control}
-                render={({ field }) => (
-                  <Box>
-                    <For each={field.value}>
-                      {(role, index) => (
-                        <Tag
-                          key={index}
-                          size="lg"
-                          colorScheme="blue"
-                          borderRadius="full"
-                          m={1}
-                          closable
-                          onClick={() => removeRole(role)}
-                        >
-                          {role}
-                        </Tag>
-                      )}
-                    </For>
-                  </Box>
-                )}
-              />
-              <Input
-                id="role-input"
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addRole();
-                  }
-                }}
-              />
+              <RoleInput control={control} />
             </Field>
 
             <Field label="Order No.">
@@ -254,17 +225,17 @@ function EditPersonForm(person: PersonProps) {
           </Fieldset.Content>
 
           <Fieldset.Content marginTop={0}>
-            <Image
+            {previewImage && <Image
               src={previewImage}
               objectFit={"contain"}
               aspectRatio={"golden"}
-            />
+            />}
             <FileUploadRoot
               onFileChange={(e) => {
                 if (e.acceptedFiles.length > 0)
                   return setUploadImage(e.acceptedFiles);
 
-                return setUploadImage([]);
+                // return setUploadImage([]);
               }}
             >
               <InputGroup

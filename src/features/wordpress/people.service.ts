@@ -1,3 +1,5 @@
+import z from "zod";
+
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type PersonProps = {
@@ -11,6 +13,16 @@ export type PersonProps = {
   indexNumber: number;
 };
 
+export const PersonSchema = z.object({
+  name: z.string(),
+  position: z.string(),
+  roles: z.string().array(),
+  image: z.instanceof(File).optional(),
+  biography: z.string(),
+  visibility: z.boolean().default(false),
+  indexNumber: z.number().default(0)
+})
+
 const ServerError = "Internal Server Error"
 const NotFoundError = "Data not found."
 
@@ -23,6 +35,7 @@ export async function getPersons() {
   }
 
   const data: PersonProps[] = await res.json();
+  console.log(data)
 
   return data.sort((a, b) =>
     a.indexNumber > b.indexNumber ? 0 : -1
@@ -44,11 +57,18 @@ export async function getPersonById(id: number) {
   return data;
 }
 
-export async function createPerson(person: PersonProps) {
+export async function createPerson(person: z.infer<typeof PersonSchema>) {
+  const formData = new FormData()
+  formData.append("name", person.name)
+  formData.append("position", person.position)
+  formData.append("roles", JSON.stringify(person.roles))
+  if (person.image) formData.append("image", person.image)
+  formData.append("biography", person.biography)
+  formData.append("visibility", person.visibility ? "1" : "0")
+
   const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons`, {
     method: "POST",
-    body: JSON.stringify(person),
-    headers: { "Content-Type": "application/json" },
+    body: formData,
   });
 
   if (!res.ok) throw new Error(ServerError);
@@ -58,13 +78,20 @@ export async function createPerson(person: PersonProps) {
   return data;
 }
 
-export async function updatePerson(person: PersonProps) {
+export async function updatePerson(personId: number, person: z.infer<typeof PersonSchema>) {
+  const formData = new FormData()
+  formData.append("name", person.name)
+  formData.append("position", person.position)
+  formData.append("roles", JSON.stringify(person.roles))
+  if (person.image) formData.append("image", person.image)
+  formData.append("biography", person.biography)
+  formData.append("visibility", person.visibility ? "1" : "0")
+
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons/${person.id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons/${personId}`,
     {
-      method: "PUT",
-      body: JSON.stringify(person),
-      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: formData,
     }
   );
 
@@ -86,6 +113,19 @@ export async function deletePerson(id: number) {
   const data: PersonProps = await res.json();
 
   return data;
+}
+
+export async function getPersonsNames() {
+  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons/names`);
+
+  if (!res.ok) {
+    if (res.status === 404) throw new Error(NotFoundError);
+    throw new Error(ServerError)
+  }
+
+  const data: Pick<PersonProps, "id" | "name">[] = await res.json();
+
+  return data
 }
 
 export async function reorderPersons(people: PersonProps[]) {

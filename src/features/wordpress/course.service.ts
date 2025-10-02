@@ -1,15 +1,27 @@
+import z from "zod";
+
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type CourseProps = {
   id: number;
   title: string;
   duration: string;
-  instructor: string;
+  instructorId: number;
   guestLecturer: string;
   outlines: string[];
   visibility: boolean;
   indexNumber: number;
 };
+
+export const CourseSchema = z.object({
+  title: z.string(),
+  duration: z.string(),
+  instructorId: z.number(),
+  guestLecturer: z.string().optional(),
+  outlines: z.string().array(),
+  visibility: z.boolean().default(false),
+  indexNumber: z.number().default(0)
+})
 
 export async function getCourses() {
   const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses`);
@@ -41,7 +53,7 @@ export async function getCourseById(id: number) {
   return data;
 }
 
-export async function createCourse(course: CourseProps) {
+export async function createCourse(course: z.infer<typeof CourseSchema>) {
   const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses`, {
     method: "POST",
     body: JSON.stringify(course),
@@ -58,9 +70,9 @@ export async function createCourse(course: CourseProps) {
   return data;
 }
 
-export async function updateCourse(course: CourseProps) {
+export async function updateCourse(courseId: number, course: z.infer<typeof CourseSchema>) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${course.id}`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${courseId}`,
     {
       method: "PUT",
       body: JSON.stringify(course),

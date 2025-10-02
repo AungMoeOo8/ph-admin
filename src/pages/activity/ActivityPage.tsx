@@ -3,7 +3,6 @@ import {
   ActivityProps,
   reorderActivity,
 } from "@/features/wordpress/activity.service";
-import { deleteFile } from "@/features/wordpress/upload.service";
 import {
   Box,
   Button,
@@ -29,7 +28,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 import { ErrorBoundary } from "react-error-boundary";
@@ -95,27 +94,9 @@ export default function ActivityPage() {
 
   const { data, isPending } = useGetAllActivities();
 
-  const deleteFileMutation = useMutation({
-    mutationFn: async (filePath: string) => {
-      const response = await deleteFile(filePath);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
-
   const { mutateAsync } = useDeleteActivity()
 
-  async function handleDeleteBtn(id: number, filePath: string) {
-
-    await deleteFileMutation.mutateAsync(filePath, {
-      onError: () => {
-        toaster.create({
-          type: "error",
-          description: "Deleting failed.",
-        });
-        return;
-      },
-    });
+  async function handleDeleteBtn(id: number) {
 
     await mutateAsync(id, {
       onSuccess: () => {
@@ -195,7 +176,7 @@ export default function ActivityPage() {
                     key={index}
                     activity={activity}
                     handleDeleteBtn={async () =>
-                      await handleDeleteBtn(activity.id, activity.imageUrl)
+                      await handleDeleteBtn(activity.id)
                     }
                   />
                 );

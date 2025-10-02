@@ -1,6 +1,5 @@
 import { toaster } from "@/components/ui/toaster";
 import { reorderPersons } from "@/features/wordpress/people.service";
-import { deleteFile } from "@/features/wordpress/upload.service";
 import {
   Badge,
   Box,
@@ -11,7 +10,7 @@ import {
   Table,
   Text,
 } from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Link } from "react-router";
 import { Reorder } from "motion/react";
@@ -45,31 +44,12 @@ export default function PeoplePage() {
     });
   }, []);
 
-  const deleteFileMutation = useMutation({
-    mutationFn: async (filePath: string) => {
-      const response = await deleteFile(filePath);
-      if (!response.isSuccess) throw new Error(response.message);
-      return response;
-    },
-  });
-
   const deletePersonMutation = useDeletePerson();
 
-  async function handleDeleteBtn(id: number, filePath: string) {
-    // if (filePath !== '') {
-    //   await deleteFileMutation.mutateAsync(filePath, {
-    //     onError: () => {
-    //       toaster.create({
-    //         type: "error",
-    //         description: "Deleting failed.",
-    //       });
-    //       return;
-    //     },
-    //   });
-    // }
+  async function handleDeleteBtn(id: number) {
 
     await deletePersonMutation.mutateAsync(id, {
-      onSuccess: (_, id) => {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Deleting successful.",
@@ -160,7 +140,7 @@ export default function PeoplePage() {
                         <IconButton
                           colorPalette={"red"}
                           onClick={async () => {
-                            await handleDeleteBtn(person.id, person.image);
+                            await handleDeleteBtn(person.id);
                           }}
                         >
                           <LuTrash />

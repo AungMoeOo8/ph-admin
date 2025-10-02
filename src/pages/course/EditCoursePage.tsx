@@ -1,8 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { Tag } from "@/components/ui/tag";
 import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
-import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import {
@@ -11,39 +9,25 @@ import {
 } from "@/components/ui/number-input";
 import {
   CourseProps,
+  CourseSchema,
 } from "@/features/wordpress/course.service";
 import { useGetCourseById, useUpdateCourse } from "@/hooks/course";
+import z from "zod";
+import { InstructorInput, OutlineInput } from "./AddCoursePage";
 
 function EditCourseForm(course: CourseProps) {
   const navigate = useNavigate();
 
-  const { register, handleSubmit, control, getValues, setValue } =
-    useForm<CourseProps>({
-      values: course,
+  const { register, handleSubmit, control } =
+    useForm<z.infer<typeof CourseSchema>>({
+      defaultValues: course,
     });
 
-  const [outlineInput, setOutlineInput] = useState("");
+  const updateCourseMutation = useUpdateCourse(course.id);
 
-  const updateCourseMutation = useUpdateCourse();
-
-  const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
-    // if (!courseId) return;
+  const handleSaveBtn: SubmitHandler<z.infer<typeof CourseSchema>> = async (course) => {
     await updateCourseMutation.mutateAsync(course);
     navigate("/dashboard/courses", { replace: true });
-  };
-
-  const addOutline = () => {
-    const outlines = getValues("outlines");
-    if (outlineInput.trim() && !outlines.includes(outlineInput.trim())) {
-      const updatedOutlines = [...outlines, outlineInput.trim()];
-      setValue("outlines", updatedOutlines);
-    }
-    setOutlineInput("");
-  };
-
-  const removeOutline = (outline: string) => {
-    const outlines = getValues("outlines").filter((o) => o !== outline);
-    setValue("outlines", outlines);
   };
 
   return (
@@ -61,7 +45,7 @@ function EditCourseForm(course: CourseProps) {
             </Field>
 
             <Field label="Instructor" required>
-              <Input {...register("instructor")} />
+              <InstructorInput control={control} />
             </Field>
 
             <Field label="Guest Lecturer">
@@ -92,39 +76,7 @@ function EditCourseForm(course: CourseProps) {
         </Flex>
 
         <Field label="Outlines">
-          <Controller
-            name="outlines"
-            control={control}
-            render={({ field }) => (
-              <Box>
-                {field.value.map((outline, index) => (
-                  <Tag
-                    key={index}
-                    size="lg"
-                    colorScheme="blue"
-                    borderRadius="full"
-                    m={1}
-                    closable
-                    onClick={() => removeOutline(outline)}
-                  >
-                    {outline}
-                  </Tag>
-                ))}
-              </Box>
-            )}
-          />
-          <Input
-            id="outline-input"
-            type="text"
-            value={outlineInput}
-            onChange={(e) => setOutlineInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addOutline();
-              }
-            }}
-          />
+          <OutlineInput control={control} />
         </Field>
 
         <Button onClick={handleSubmit(handleSaveBtn)}>Save Changes</Button>
@@ -136,11 +88,10 @@ function EditCourseForm(course: CourseProps) {
 export default function EditCoursePage() {
   const { courseId } = useParams();
 
-  const { data: course, isLoading, error } = useGetCourseById(Number(courseId));
+  const { data: course, isLoading } = useGetCourseById(Number(courseId));
 
   return <Box>
     {isLoading && <div>Loading...</div>}
-    {error && <div>{error.message}</div>}
     {course && <EditCourseForm {...course} />}
   </Box>
 }

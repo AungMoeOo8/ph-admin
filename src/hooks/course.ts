@@ -1,4 +1,5 @@
 import {
+  CourseSchema,
   createCourse,
   deleteCourse,
   getCourseById,
@@ -6,6 +7,7 @@ import {
   updateCourse,
 } from "@/features/wordpress/course.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import z from "zod";
 
 export function useGetAllCourses() {
   return useQuery({
@@ -30,9 +32,9 @@ export function useCreateCourse() {
     mutationFn: createCourse
   });
 }
-export function useUpdateCourse() {
+export function useUpdateCourse(courseId: number) {
   return useMutation({
-    mutationFn: updateCourse
+    mutationFn: (course: z.infer<typeof CourseSchema>) => updateCourse(courseId, course)
   });
 }
 

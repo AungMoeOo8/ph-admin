@@ -2,6 +2,7 @@ const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type ActivityProps = {
   id: number;
+  mediaId: number;
   imageUrl: string;
   visibility: boolean;
   indexNumber: number;

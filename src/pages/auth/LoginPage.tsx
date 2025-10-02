@@ -1,5 +1,6 @@
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
+import { toaster } from "@/components/ui/toaster";
 import { login as loginRequest } from "@/features/wordpress/auth.service";
 import { useAuth } from "@/hooks/auth";
 import { getUserFromStorage } from "@/util";
@@ -37,22 +38,19 @@ export default function LoginPage() {
   }
 
   async function handleLogin() {
-    const { data, isSuccess } = await loginRequest(username, password);
+    try {
+      const user = await loginRequest(username, password);
 
-    if (!isSuccess) {
-      return alert("login failed.");
+      login(user);
+
+      const to = new URL(location.href).searchParams.get("from") || "/dashboard/people"
+
+      navigate(to, { replace: true });
+    } catch {
+      toaster.create({
+        description: "Login failed."
+      })
     }
-
-    login({
-      id: data.id,
-      email: data.email,
-      name: data.name,
-      token: data.token,
-    });
-
-    const to = new URL(location.href).searchParams.get("from") || "/dashboard/people"
-
-    navigate(to, { replace: true });
   }
 
   return (

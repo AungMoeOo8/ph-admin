@@ -10,8 +10,6 @@ export function useGetAllActivities() {
   return useQuery({
     queryKey: ["activities"],
     queryFn: getActivities,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false
   });
 }
 

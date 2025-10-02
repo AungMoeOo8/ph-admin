@@ -10,9 +10,13 @@ import {
 
 export type User = {
   id: number;
+  username: string;
   email: string;
   name: string;
-  token: string;
+  refreshToken: string;
+  refreshExpiry: number;
+  accessToken: string;
+  accessExpiry: number
 };
 
 export type AuthContextProps = {

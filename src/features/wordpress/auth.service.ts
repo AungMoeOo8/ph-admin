@@ -1,41 +1,40 @@
-const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
+import { User } from "@/hooks/auth";
 
-export type AuthProps = {
-  id: number;
-  email: string;
-  name: string;
-  token: string;
-};
+const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export async function login(username: string, password: string) {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/auth/login`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/auth/login`,
     {
       method: "POST",
       body: JSON.stringify({ username, password }),
+      headers: {
+        "Content-Type": "application/json"
+      }
     }
   );
-  const data = (await res.json()) as {
-    isSuccess: boolean;
-    message: string;
-    data: AuthProps;
-  };
 
+  if (!res.ok) {
+    throw new Error("Internal server error.")
+  }
+
+  const data: User = await res.json()
   return data;
 }
 
 export async function logout() {
   const res = await fetch(
-    `${VITE_WORDPRESS_DOMAIN}/phweb/wp-json/api/auth/logout`,
+    `${VITE_WORDPRESS_DOMAIN}/wp-json/api/auth/logout`,
     {
       method: "POST",
     }
   );
-  const data = (await res.json()) as {
-    isSuccess: boolean;
-    message: string;
-    data: AuthProps;
-  };
+
+  if (!res.ok) {
+    throw new Error("Internal server error.")
+  }
+
+  const data = await res.json()
 
   return data;
 }

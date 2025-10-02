@@ -29,6 +29,8 @@ export default function CoursePage() {
       return;
     }
 
+    console.log("rerender")
+
     const updatedData = data!.map((course, index) => {
       course.indexNumber = index;
       return course;
@@ -106,7 +108,7 @@ export default function CoursePage() {
                   <Reorder.Item key={index} value={course} as="tr">
                     <Table.Cell>{index + 1}</Table.Cell>
                     <Table.Cell>{course.title}</Table.Cell>
-                    <Table.Cell>{course.instructor}</Table.Cell>
+                    <Table.Cell>{course.instructorId}</Table.Cell>
                     <Table.Cell>
                       <Badge
                         size={"lg"}

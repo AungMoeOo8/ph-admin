@@ -1,42 +1,139 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Tag } from "@/components/ui/tag";
-import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
-import { useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Box, Button, createListCollection, Fieldset, Flex, Heading, Input, SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValueText } from "@chakra-ui/react";
+import { useMemo, useState } from "react";
+import { Control, Controller, SubmitHandler, useController, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import {
   NumberInputField,
   NumberInputRoot,
 } from "@/components/ui/number-input";
 import { toaster } from "@/components/ui/toaster";
-import { CourseProps } from "@/features/wordpress/course.service";
+import { CourseSchema } from "@/features/wordpress/course.service";
 import { useCreateCourse } from "@/hooks/course";
+import z from "zod";
+import { useGetPersonsNames } from "@/hooks/people";
+
+export function InstructorInput({ control }: { control: Control<z.infer<typeof CourseSchema>> }) {
+  const { data: persons, isLoading } = useGetPersonsNames();
+
+  const { field } = useController({ control, name: "instructorId" });
+
+  // Build a collection that the Chakra collection select expects
+  const collection = useMemo(() => {
+    return createListCollection({
+      items: (persons ?? []).map(person => ({
+        label: person.name,
+        value: person.id.toString(),
+      }))
+    });
+  }, [persons]);
+
+  const selectValue = useMemo(() => {
+    return field.value ? [field.value.toString()] : [""]
+  }, [field.value])
+
+  if (isLoading) return <p>Loading...</p>;
+
+  return (
+    <SelectRoot
+      collection={collection}
+      value={selectValue}
+      onSelect={(values) => field.onChange(values.value)}
+    >
+      <SelectTrigger>
+        <SelectValueText placeholder="Select instructor" />
+      </SelectTrigger>
+
+      <SelectContent position="absolute" top="100%" w="100%">
+        {collection.items.map((option) => (
+          <SelectItem
+            key={option.value}
+            item={option}
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </SelectRoot>
+  );
+}
+
+export function OutlineInput({ control }: { control: Control<z.infer<typeof CourseSchema>> }) {
+
+  const { field } = useController({ control: control, name: "outlines" })
+
+  const [outlineInput, setOutlineInput] = useState("");
+
+  const addOutline = () => {
+    const outlines = field.value;
+    if (outlineInput.trim() && !outlines.includes(outlineInput.trim())) {
+      const updatedOutlines = [...outlines, outlineInput.trim()];
+      field.onChange(updatedOutlines);
+    }
+    setOutlineInput("");
+  };
+
+  const removeOutline = (outline: string) => {
+    const outlines = field.value.filter((o) => o !== outline);
+    field.onChange(outlines);
+  };
+
+  return (
+    <>
+      <Controller
+        name="outlines"
+        control={control}
+        render={({ field }) => (
+          <Box>
+            {field.value.map((outline, index) => (
+              <Tag
+                key={index}
+                size="lg"
+                colorScheme="blue"
+                borderRadius="full"
+                m={1}
+                closable
+                onClick={() => removeOutline(outline)}
+              >
+                {outline}
+              </Tag>
+            ))}
+          </Box>
+        )}
+      />
+      <Input
+        id="outline-input"
+        type="text"
+        value={outlineInput}
+        onChange={(e) => setOutlineInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addOutline();
+          }
+        }}
+      />
+    </>
+  )
+}
 
 export default function AddCoursePage() {
   const navigate = useNavigate();
 
-  const { register, handleSubmit, control, getValues, setValue } =
-    useForm<CourseProps>({
+  const { register, handleSubmit, control } =
+    useForm<z.infer<typeof CourseSchema>>({
       defaultValues: {
-        id: -1,
-        title: "",
-        duration: "",
-        instructor: "",
-        guestLecturer: "",
         outlines: [],
-        visibility: false,
-        indexNumber: 0,
       },
     });
 
-  const [outlineInput, setOutlineInput] = useState("");
-
   const createCourseMutation = useCreateCourse();
 
-  const handleSaveBtn: SubmitHandler<CourseProps> = async (course) => {
+  const handleSaveBtn: SubmitHandler<z.infer<typeof CourseSchema>> = async (course) => {
     await createCourseMutation.mutateAsync(course, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Course saved.",
@@ -52,19 +149,6 @@ export default function AddCoursePage() {
     });
   };
 
-  const addOutline = () => {
-    const outlines = getValues("outlines");
-    if (outlineInput.trim() && !outlines.includes(outlineInput.trim())) {
-      const updatedOutlines = [...outlines, outlineInput.trim()];
-      setValue("outlines", updatedOutlines);
-    }
-    setOutlineInput("");
-  };
-
-  const removeOutline = (outline: string) => {
-    const outlines = getValues("outlines").filter((o) => o !== outline);
-    setValue("outlines", outlines);
-  };
 
   return (
     <Box>
@@ -81,7 +165,7 @@ export default function AddCoursePage() {
             </Field>
 
             <Field label="Instructor" required>
-              <Input {...register("instructor")} />
+              <InstructorInput control={control} />
             </Field>
 
             <Field label="Guest Lecturer">
@@ -112,39 +196,7 @@ export default function AddCoursePage() {
         </Flex>
 
         <Field label="Outlines">
-          <Controller
-            name="outlines"
-            control={control}
-            render={({ field }) => (
-              <Box>
-                {field.value.map((outline, index) => (
-                  <Tag
-                    key={index}
-                    size="lg"
-                    colorScheme="blue"
-                    borderRadius="full"
-                    m={1}
-                    closable
-                    onClick={() => removeOutline(outline)}
-                  >
-                    {outline}
-                  </Tag>
-                ))}
-              </Box>
-            )}
-          />
-          <Input
-            id="outline-input"
-            type="text"
-            value={outlineInput}
-            onChange={(e) => setOutlineInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addOutline();
-              }
-            }}
-          />
+          <OutlineInput control={control} />
         </Field>
 
         <Button onClick={handleSubmit(handleSaveBtn)}>Save</Button>
