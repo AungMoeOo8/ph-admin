@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter, LoaderFunction, redirect, RouteObject } from "react-router";
+import { createBrowserRouter, MiddlewareFunction, redirect, RouteObject } from "react-router";
 import PeoplePage from "./pages/people/PeoplePage";
 import AddPeoplePage from "./pages/people/AddPeoplePage";
 import EditPeoplePage from "./pages/people/EditPeoplePage";
@@ -11,10 +11,10 @@ import AddCoursePage from "./pages/course/AddCoursePage";
 import EditCoursePage from "./pages/course/EditCoursePage";
 import ActivityPage from "./pages/activity/ActivityPage";
 import AddActivityPage from "./pages/activity/AddActivityPage";
-import { getUserFromStorage } from "./util";
 import App from "./App";
-import { loginLoader } from "./pages/auth/LoginPage";
-import DashboardLayout, { dashboardLoader } from "./layouts/DashboardLayout";
+import DashboardLayout, { dashboardMiddleware } from "./layouts/DashboardLayout";
+import { fetchFactory } from "./fetchFactory";
+import { loginMiddleware } from "./pages/auth/LoginPage";
 
 const LoginPage = React.lazy(() => import("./pages/auth/LoginPage"));
 
@@ -86,34 +86,51 @@ const ActivityRoutes: RouteObject = {
   ]
 }
 
-const HomePageLoader: LoaderFunction = () => {
-  const user = getUserFromStorage();
-  if (!user) {
+const homePageMiddleware: MiddlewareFunction = ({ request }) => {
+  const token = fetchFactory.getToken()
+  console.log({ token })
+  if (!token) throw redirect(`/login`);
 
-    throw redirect(
-      `/login`,
-    );
-  }
-
-  throw redirect("/dashboard/people");
+  const url = new URL(request.url);
+  const from = url.searchParams.get("from") || "/dashboard";
+  throw redirect(from);
 }
 
-export default createBrowserRouter([
+const AuthMiddleware: MiddlewareFunction = async () => {
+  try {
+    const token = fetchFactory.getToken()
+
+    // check if token exist on the first mount
+    if (!token) {
+      await fetchFactory.refreshAccessTokenAndExpiry()
+    }
+
+  } catch {
+    console.log("Auth Middleware error")
+  }
+
+}
+
+export const router = createBrowserRouter([
   {
     path: "/", Component: App,
     children: [
       {
         index: true,
-        loader: HomePageLoader,
+        middleware: [AuthMiddleware, homePageMiddleware],
+        loader: () => { }
       },
       {
-        path: "/login", Component: LoginPage,
-        loader: loginLoader
+        path: "/login",
+        middleware: [AuthMiddleware, loginMiddleware],
+        loader: () => { },
+        Component: LoginPage,
       },
       {
         path: "dashboard",
+        middleware: [AuthMiddleware, dashboardMiddleware],
+        loader: () => { },
         Component: DashboardLayout,
-        loader: dashboardLoader,
         children: [
           PeopleRoutes,
           ServiceRoutes,

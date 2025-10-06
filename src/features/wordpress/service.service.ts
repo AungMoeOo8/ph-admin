@@ -1,3 +1,5 @@
+import { fetchFactory } from "@/fetchFactory";
+
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type ServiceProps = {
@@ -42,7 +44,7 @@ export async function getServiceById(id: number) {
 }
 
 export async function createService(service: ServiceProps) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services`,
     {
       method: "POST",
@@ -59,7 +61,7 @@ export async function createService(service: ServiceProps) {
 }
 
 export async function updateService(service: ServiceProps) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/${service.id}`,
     {
       method: "PUT",
@@ -76,7 +78,7 @@ export async function updateService(service: ServiceProps) {
 }
 
 export async function deleteService(id: number) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/${id}`,
     { method: "DELETE" }
   );
@@ -86,7 +88,7 @@ export async function deleteService(id: number) {
 }
 
 export async function reorderServices(services: ServiceProps[]) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/reorder`,
     {
       method: "POST",

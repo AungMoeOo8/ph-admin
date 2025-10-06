@@ -1,3 +1,4 @@
+import { fetchFactory } from "@/fetchFactory";
 import z from "zod";
 
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
@@ -54,7 +55,7 @@ export async function getCourseById(id: number) {
 }
 
 export async function createCourse(course: z.infer<typeof CourseSchema>) {
-  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses`, {
+  const res = await fetchFactory.createFetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses`, {
     method: "POST",
     body: JSON.stringify(course),
     headers: {
@@ -71,7 +72,7 @@ export async function createCourse(course: z.infer<typeof CourseSchema>) {
 }
 
 export async function updateCourse(courseId: number, course: z.infer<typeof CourseSchema>) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${courseId}`,
     {
       method: "PUT",
@@ -91,7 +92,7 @@ export async function updateCourse(courseId: number, course: z.infer<typeof Cour
 }
 
 export async function deleteCourse(id: number) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/${id}`,
     {
       method: "DELETE",
@@ -110,7 +111,7 @@ export async function deleteCourse(id: number) {
 }
 
 export async function reorderCourses(courses: CourseProps[]) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/courses/reorder`,
     {
       method: "POST",

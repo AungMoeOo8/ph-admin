@@ -1,3 +1,5 @@
+import { fetchFactory } from "@/fetchFactory";
+
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 
 export type ActivityProps = {
@@ -35,7 +37,7 @@ export async function createActivity(activity: ActivityProps, file: File) {
   formData.append("visibility", activity.visibility ? "true" : "false");
   formData.append("indexNumber", activity.indexNumber.toString());
 
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities`,
     {
       method: "POST",
@@ -49,7 +51,7 @@ export async function createActivity(activity: ActivityProps, file: File) {
 }
 
 export async function updateActivity(id: string, service: ActivityProps) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activity/${id}`,
     {
       method: "PATCH",
@@ -63,7 +65,7 @@ export async function updateActivity(id: string, service: ActivityProps) {
 }
 
 export async function deleteActivity(id: number) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities/${id}`,
     { method: "DELETE" }
   );
@@ -73,7 +75,7 @@ export async function deleteActivity(id: number) {
 }
 
 export async function reorderActivity(activities: ActivityProps[]) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/activities/reorder`,
     {
       method: "POST",

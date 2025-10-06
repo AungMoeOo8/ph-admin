@@ -1,3 +1,5 @@
+// import { validateToken } from "@/util";
+import { fetchFactory } from "@/fetchFactory";
 import z from "zod";
 
 const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
@@ -35,7 +37,6 @@ export async function getPersons() {
   }
 
   const data: PersonProps[] = await res.json();
-  console.log(data)
 
   return data.sort((a, b) =>
     a.indexNumber > b.indexNumber ? 0 : -1
@@ -66,7 +67,7 @@ export async function createPerson(person: z.infer<typeof PersonSchema>) {
   formData.append("biography", person.biography)
   formData.append("visibility", person.visibility ? "1" : "0")
 
-  const res = await fetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons`, {
+  const res = await fetchFactory.createFetch(`${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons`, {
     method: "POST",
     body: formData,
   });
@@ -87,7 +88,7 @@ export async function updatePerson(personId: number, person: z.infer<typeof Pers
   formData.append("biography", person.biography)
   formData.append("visibility", person.visibility ? "1" : "0")
 
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons/${personId}`,
     {
       method: "POST",
@@ -103,7 +104,7 @@ export async function updatePerson(personId: number, person: z.infer<typeof Pers
 }
 
 export async function deletePerson(id: number) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons/${id}`,
     { method: "DELETE" }
   );
@@ -129,7 +130,7 @@ export async function getPersonsNames() {
 }
 
 export async function reorderPersons(people: PersonProps[]) {
-  const res = await fetch(
+  const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/persons/reorder`,
     {
       method: "POST",

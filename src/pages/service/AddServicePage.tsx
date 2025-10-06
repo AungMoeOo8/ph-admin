@@ -297,7 +297,7 @@ export default function AddServicePage() {
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
 
     await createServicemutation.mutateAsync(service, {
-      onSuccess: (response) => {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Service saved.",

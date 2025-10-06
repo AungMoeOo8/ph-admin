@@ -124,12 +124,10 @@ function EditPersonForm(person: PersonProps) {
       },
     });
 
-  const [uploadImage, setUploadImage] = useState<File[]>([]);
 
   const updatePersonMutation = useUpdatePerson(person.id)
 
   const savePerson: SubmitHandler<z.infer<typeof PersonSchema>> = async (person) => {
-    person.image = uploadImage[0]
     await updatePersonMutation.mutateAsync(person, {
       onSuccess: () => {
         toaster.create({
@@ -149,14 +147,11 @@ function EditPersonForm(person: PersonProps) {
   };
 
   const previewImage = useMemo(() => {
-    if (uploadImage.length > 0) {
-      return URL.createObjectURL(uploadImage![0]);
-    }
     if (watch("image")) {
       return URL.createObjectURL(watch("image")!);
     }
     return person.image
-  }, [uploadImage, watch("image")]);
+  }, [watch("image")]);
 
   return (
     <>
@@ -230,34 +225,36 @@ function EditPersonForm(person: PersonProps) {
               objectFit={"contain"}
               aspectRatio={"golden"}
             />}
-            <FileUploadRoot
-              onFileChange={(e) => {
-                if (e.acceptedFiles.length > 0)
-                  return setUploadImage(e.acceptedFiles);
-
-                // return setUploadImage([]);
-              }}
-            >
-              <InputGroup
-                w="full"
-                startElement={<LuFileUp />}
-                endElement={
-                  <FileUploadClearTrigger asChild>
-                    <CloseButton
-                      me="-1"
-                      size="xs"
-                      variant="plain"
-                      focusVisibleRing="inside"
-                      focusRingWidth="2px"
-                      pointerEvents="auto"
-                      color="fg.subtle"
-                    />
-                  </FileUploadClearTrigger>
-                }
-              >
-                <FileInput />
-              </InputGroup>
-            </FileUploadRoot>
+            <Controller
+              control={control}
+              name="image"
+              render={({ field }) => (
+                <FileUploadRoot
+                  onFileChange={(e) => {
+                    if (e.acceptedFiles.length > 0)
+                      return field.onChange(e.acceptedFiles[0]);
+                  }}
+                >
+                  <InputGroup
+                    w="full"
+                    startElement={<LuFileUp />}
+                    endElement={
+                      <FileUploadClearTrigger asChild>
+                        <CloseButton
+                          me="-1"
+                          size="xs"
+                          variant="plain"
+                          focusVisibleRing="inside"
+                          focusRingWidth="2px"
+                          pointerEvents="auto"
+                          color="fg.subtle"
+                        />
+                      </FileUploadClearTrigger>
+                    }
+                  >
+                    <FileInput />
+                  </InputGroup>
+                </FileUploadRoot>)} />
           </Fieldset.Content>
         </Flex>
 

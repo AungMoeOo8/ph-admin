@@ -7,7 +7,7 @@ import {
   PersonSchema,
   updatePerson,
 } from "@/features/wordpress/people.service";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 
 export function useGetAllPersons() {
@@ -35,18 +35,18 @@ export function useCreatePerson() {
 }
 
 export function useUpdatePerson(personId: number) {
-  // const qc = useQueryClient()
   return useMutation({
     mutationFn: (props: z.infer<typeof PersonSchema>) => updatePerson(personId, props)
-    // onSuccess: (person) => {
-    //   qc.invalidateQueries({ queryKey: ["persons", person.id] })
-    // }
   });
 }
 
 export function useDeletePerson() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: deletePerson
+    mutationFn: deletePerson,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["persons"] })
+    }
   });
 }
 

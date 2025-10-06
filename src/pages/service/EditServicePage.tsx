@@ -292,7 +292,7 @@ function EditServiceForm(service: ServiceProps) {
 
   const handleSaveBtn: SubmitHandler<ServiceProps> = async (service) => {
     await updateServiceMutation.mutateAsync(service, {
-      onSuccess: (response) => {
+      onSuccess: () => {
         toaster.create({
           type: "success",
           description: "Service updated",

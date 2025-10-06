@@ -15,12 +15,11 @@ import {
   Heading,
   IconButton,
 } from "@chakra-ui/react";
-import { LoaderFunction, NavLink, Outlet, redirect, useNavigate } from "react-router";
+import { MiddlewareFunction, NavLink, Outlet, redirect } from "react-router";
 import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
-// import { logout } from "@/features/supabase/auth.service";
 import { ErrorBoundary } from "react-error-boundary";
 import { useAuth } from "@/hooks/auth";
-import { getUserFromStorage } from "@/util";
+import { fetchFactory } from "@/fetchFactory";
 
 const navLinks = [
   { name: "People", to: "/dashboard/people", icon: LuUsers },
@@ -29,27 +28,23 @@ const navLinks = [
   { name: "Activity", to: "/dashboard/activities", icon: LuImages },
 ];
 
-export const dashboardLoader: LoaderFunction = ({ request }) => {
-  const user = getUserFromStorage();
-  if (!user) {
-    const url = new URL(request.url);
+export const dashboardMiddleware: MiddlewareFunction = async ({ request }) => {
+  const token = fetchFactory.getToken()
 
-    // Preserve the full path + query string
+  if (!token) {
+    const url = new URL(request.url);
     throw redirect(
       `/login?from=${encodeURIComponent(url.pathname + url.search)}`
     );
   }
 
-  return null
 }
 
 export default function DashboardLayout() {
   const { logout } = useAuth();
-  const navigate = useNavigate()
 
   async function handleLogout() {
-    logout();
-    navigate("/login", { replace: true });
+    await logout();
   }
 
   return (

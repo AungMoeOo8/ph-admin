@@ -1,6 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { v4 as uuidv4 } from "uuid";
 import { Box, Button, Fieldset, Flex, Heading, Image } from "@chakra-ui/react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
@@ -17,7 +16,6 @@ import { LuUpload } from "react-icons/lu";
 import { useMemo, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { ActivityProps } from "@/features/wordpress/activity.service";
-import { useFileUpload } from "@/hooks/file-upload";
 import { useCreateActivity } from "@/hooks/activity";
 
 export default function AddActivityPage() {
