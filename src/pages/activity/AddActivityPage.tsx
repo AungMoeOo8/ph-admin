@@ -39,23 +39,9 @@ export default function AddActivityPage() {
     return watch("imageUrl");
   }, [uploadImage, watch("imageUrl")]);
 
-  // const uploadFileMutation = useFileUpload("activity");
-
   const { mutateAsync } = useCreateActivity();
 
   const handleSaveBtn: SubmitHandler<ActivityProps> = async (activity) => {
-    // const response = await uploadFileMutation.mutateAsync(uploadImage[0], {
-    //   onError: (error) => {
-    //     toaster.create({
-    //       type: "error",
-    //       description: error.message,
-    //     });
-    //     return;
-    //   },
-    // });
-
-    // activity.imageUrl = response.url!;
-    console.log(activity);
     await mutateAsync({ activity, file: uploadImage[0] }, {
       onError(error) {
         toaster.create({

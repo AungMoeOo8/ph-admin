@@ -23,9 +23,7 @@ export async function getServices() {
 
   const data: ServiceProps[] = await res.json();
 
-  return data.sort((a, b) =>
-    a.indexNumber > b.indexNumber ? 0 : -1
-  );
+  return data
 }
 
 export async function getServiceById(id: number) {

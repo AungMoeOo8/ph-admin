@@ -98,7 +98,6 @@ export default function PeoplePage() {
             </Table.Header>
             <Table.Body>
               {data
-                // .sort((a, b) => (a.indexNumber > b.indexNumber ? 0 : -1))
                 .map((person, index) => (
                   <Table.Row key={person.id} asChild>
                     <Reorder.Item key={person.id} value={person} as="tr">
