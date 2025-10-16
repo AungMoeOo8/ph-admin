@@ -1,6 +1,5 @@
 import { toaster } from "@/components/ui/toaster";
-import { reorderServices, ServiceProps } from "@/features/wordpress/service.service";
-import { useGetPersonsNames } from "@/hooks/people";
+import { reorderServices } from "@/features/wordpress/service.service";
 import { useDeleteService, useGetAllServices } from "@/hooks/service";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import {

@@ -105,7 +105,7 @@ const AuthMiddleware: MiddlewareFunction = async () => {
     }
 
   } catch {
-
+    console.log("Auth middleware catch")
   }
 
 }

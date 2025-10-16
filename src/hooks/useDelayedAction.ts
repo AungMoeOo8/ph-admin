@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-function useDelayedAction(action: () => void, dependency: any) {
+function useDelayedAction(action: () => void, dependency: unknown) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
