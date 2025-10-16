@@ -88,7 +88,6 @@ const ActivityRoutes: RouteObject = {
 
 const homePageMiddleware: MiddlewareFunction = ({ request }) => {
   const token = fetchFactory.getToken()
-  console.log({ token })
   if (!token) throw redirect(`/login`);
 
   const url = new URL(request.url);

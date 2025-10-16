@@ -35,8 +35,12 @@ export function useCreatePerson() {
 }
 
 export function useUpdatePerson(personId: number) {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: (props: z.infer<typeof PersonSchema>) => updatePerson(personId, props)
+    mutationFn: (props: z.infer<typeof PersonSchema>) => updatePerson(personId, props),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["persons", personId] })
+    }
   });
 }
 

@@ -4,10 +4,6 @@ import { Box, Button, Fieldset, Flex, Heading, Input } from "@chakra-ui/react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import {
-  NumberInputField,
-  NumberInputRoot,
-} from "@/components/ui/number-input";
-import {
   CourseProps,
   CourseSchema,
 } from "@/features/wordpress/course.service";
@@ -50,12 +46,6 @@ function EditCourseForm(course: CourseProps) {
 
             <Field label="Guest Lecturer">
               <Input {...register("guestLecturer")} />
-            </Field>
-
-            <Field label="Order No.">
-              <NumberInputRoot>
-                <NumberInputField {...register("indexNumber")} />
-              </NumberInputRoot>
             </Field>
 
             <Controller

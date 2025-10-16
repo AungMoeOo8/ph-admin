@@ -1,5 +1,6 @@
 import { toaster } from "@/components/ui/toaster";
-import { reorderServices } from "@/features/wordpress/service.service";
+import { reorderServices, ServiceProps } from "@/features/wordpress/service.service";
+import { useGetPersonsNames } from "@/hooks/people";
 import { useDeleteService, useGetAllServices } from "@/hooks/service";
 import useDelayedAction from "@/hooks/useDelayedAction";
 import {
@@ -93,6 +94,7 @@ export default function ServicePage() {
                 <Table.ColumnHeader>No.</Table.ColumnHeader>
                 <Table.ColumnHeader>Name</Table.ColumnHeader>
                 <Table.ColumnHeader>Provider</Table.ColumnHeader>
+                <Table.ColumnHeader>Provided by</Table.ColumnHeader>
                 <Table.ColumnHeader>Status</Table.ColumnHeader>
                 <Table.ColumnHeader></Table.ColumnHeader>
               </Table.Row>
@@ -104,6 +106,7 @@ export default function ServicePage() {
                     <Table.Cell>{index + 1}</Table.Cell>
                     <Table.Cell>{service.name}</Table.Cell>
                     <Table.Cell>{service.provider}</Table.Cell>
+                    <Table.Cell>{service.providedByName}</Table.Cell>
                     <Table.Cell>
                       <Badge
                         size={"lg"}

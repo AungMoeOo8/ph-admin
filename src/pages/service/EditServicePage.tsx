@@ -51,6 +51,7 @@ import {
   ServiceProps,
 } from "@/features/wordpress/service.service";
 import { useGetServiceById, useUpdateService } from "@/hooks/service";
+import { ProvidedByInput } from "./AddServicePage";
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -321,14 +322,12 @@ function EditServiceForm(service: ServiceProps) {
             <Input {...register("provider")} />
           </Field>
 
-          <Field required label="Description">
-            <Textarea rows={5} {...register("description")} />
+          <Field required label="Provided by">
+            <ProvidedByInput control={control} />
           </Field>
 
-          <Field label="Order No.">
-            <NumberInputRoot>
-              <NumberInputField {...register("indexNumber")} />
-            </NumberInputRoot>
+          <Field required label="Description">
+            <Textarea rows={5} {...register("description")} />
           </Field>
 
           <Controller

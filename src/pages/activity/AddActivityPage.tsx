@@ -4,10 +4,6 @@ import { Box, Button, Fieldset, Flex, Heading, Image } from "@chakra-ui/react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import {
-  NumberInputField,
-  NumberInputRoot,
-} from "@/components/ui/number-input";
-import {
   FileUploadList,
   FileUploadRoot,
   FileUploadTrigger,
@@ -23,7 +19,7 @@ export default function AddActivityPage() {
 
   const [uploadImage, setUploadImage] = useState<File[]>([]);
 
-  const { register, handleSubmit, control, watch } = useForm<ActivityProps>({
+  const { handleSubmit, control, watch } = useForm<ActivityProps>({
     defaultValues: {
       id: -1,
       imageUrl: "",
@@ -75,12 +71,6 @@ export default function AddActivityPage() {
               </FileUploadTrigger>
               <FileUploadList />
             </FileUploadRoot>
-
-            <Field label="Order No." required>
-              <NumberInputRoot>
-                <NumberInputField {...register("indexNumber")} />
-              </NumberInputRoot>
-            </Field>
 
             <Controller
               control={control}

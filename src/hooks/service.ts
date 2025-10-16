@@ -5,7 +5,7 @@ import {
   getServices,
   updateService,
 } from "@/features/wordpress/service.service";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useGetAllServices() {
   return useQuery({
@@ -32,12 +32,12 @@ export function useCreateService() {
 }
 
 export function useUpdateService() {
-  // const qc = useQueryClient()
+  const qc = useQueryClient()
   return useMutation({
     mutationFn: updateService,
-    // onSuccess: (service) => {
-    //   qc.invalidateQueries({ queryKey: ["services", service.id] })
-    // }
+    onSuccess: (service) => {
+      qc.invalidateQueries({ queryKey: ["services", service.id] })
+    }
   });
 }
 

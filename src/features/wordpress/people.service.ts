@@ -2,7 +2,7 @@
 import { fetchFactory } from "@/fetchFactory";
 import z from "zod";
 
-const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
+const { VITE_WORDPRESS_DOMAIN, VITE_PH_DOMAIN } = import.meta.env;
 
 export type PersonProps = {
   id: number;
@@ -142,4 +142,16 @@ export async function reorderPersons(people: PersonProps[]) {
   const data: PersonProps[] = await res.json();
 
   return data;
+}
+
+export async function invalidateProfessionals() {
+  const res = await fetch(`${VITE_PH_DOMAIN}/professionals`)
+
+  if (!res.ok) throw new Error(ServerError);
+}
+
+export async function invalidateMembers() {
+  const res = await fetch(`${VITE_PH_DOMAIN}/members`)
+
+  if (!res.ok) throw new Error(ServerError);
 }

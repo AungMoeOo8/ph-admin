@@ -8,10 +8,6 @@ import {
   FileUploadRoot,
 } from "@/components/ui/file-upload";
 import { InputGroup } from "@/components/ui/input-group";
-import {
-  NumberInputField,
-  NumberInputRoot,
-} from "@/components/ui/number-input";
 import { Tag } from "@/components/ui/tag";
 import { toaster } from "@/components/ui/toaster";
 import {
@@ -195,12 +191,6 @@ function EditPersonForm(person: PersonProps) {
 
             <Field label="Roles">
               <RoleInput control={control} />
-            </Field>
-
-            <Field label="Order No.">
-              <NumberInputRoot>
-                <NumberInputField {...register("indexNumber")} />
-              </NumberInputRoot>
             </Field>
 
             <Controller

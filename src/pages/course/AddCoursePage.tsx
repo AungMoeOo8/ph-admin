@@ -5,10 +5,6 @@ import { Box, Button, createListCollection, Fieldset, Flex, Heading, Input, Sele
 import { useMemo, useState } from "react";
 import { Control, Controller, SubmitHandler, useController, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import {
-  NumberInputField,
-  NumberInputRoot,
-} from "@/components/ui/number-input";
 import { toaster } from "@/components/ui/toaster";
 import { CourseSchema } from "@/features/wordpress/course.service";
 import { useCreateCourse } from "@/hooks/course";
@@ -170,12 +166,6 @@ export default function AddCoursePage() {
 
             <Field label="Guest Lecturer">
               <Input {...register("guestLecturer")} />
-            </Field>
-
-            <Field label="Order No.">
-              <NumberInputRoot>
-                <NumberInputField {...register("indexNumber")} />
-              </NumberInputRoot>
             </Field>
 
             <Controller

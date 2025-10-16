@@ -27,10 +27,6 @@ import {
 } from "@/components/ui/file-upload";
 import { LuUpload } from "react-icons/lu";
 import { toaster } from "@/components/ui/toaster";
-import {
-  NumberInputField,
-  NumberInputRoot,
-} from "@/components/ui/number-input";
 import { useCreatePerson } from "@/hooks/people";
 import { PersonSchema } from "@/features/wordpress/people.service";
 import z from "zod"
@@ -165,12 +161,6 @@ export default function AddPeoplePage() {
                   }
                 }}
               />
-            </Field>
-
-            <Field label="Order No.">
-              <NumberInputRoot>
-                <NumberInputField {...register("indexNumber")} />
-              </NumberInputRoot>
             </Field>
 
             <Controller

@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Card,
+  createListCollection,
   Fieldset,
   Flex,
   Heading,
@@ -17,6 +18,11 @@ import {
   MenuItem,
   MenuRoot,
   MenuTrigger,
+  SelectContent,
+  SelectItem,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
   SimpleGrid,
   Text,
   Textarea,
@@ -25,6 +31,7 @@ import {
   Control,
   Controller,
   SubmitHandler,
+  useController,
   useFieldArray,
   useForm,
 } from "react-hook-form";
@@ -36,7 +43,7 @@ import {
   LuX,
 } from "react-icons/lu";
 import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   DialogActionTrigger,
   DialogBody,
@@ -49,6 +56,53 @@ import {
 import { toaster } from "@/components/ui/toaster";
 import { ServiceProps } from "@/features/wordpress/service.service";
 import { useCreateService } from "@/hooks/service";
+import { useGetPersonsNames } from "@/hooks/people";
+
+export function ProvidedByInput({ control }: { control: Control<ServiceProps> }) {
+  const { data: persons, isLoading } = useGetPersonsNames();
+
+  const { field } = useController({ control, name: "providedBy" });
+
+  // Build a collection that the Chakra collection select expects
+
+  const selectValue = useMemo(() => {
+    return field.value ? [field.value.toString()] : [""]
+  }, [field.value])
+
+  const collection = useMemo(() => {
+    return createListCollection({
+      items: ([{ id: -1, name: "Unselected" }, ...(persons ?? [])]).map(person => ({
+        label: person.name,
+        value: person.id.toString(),
+      }))
+    });
+  }, [persons])
+
+  if (isLoading) return <p>Loading...</p>;
+
+  return (
+    <SelectRoot
+      collection={collection}
+      value={selectValue}
+      onSelect={(values) => field.onChange(values.value)}
+    >
+      <SelectTrigger>
+        <SelectValueText placeholder="Unselected" />
+      </SelectTrigger>
+
+      <SelectContent position="absolute" top="100%" w="100%">
+        {collection.items.map((option) => (
+          <SelectItem
+            key={option.value}
+            item={option}
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </SelectRoot>
+  );
+}
 
 const FeesEditor = ({ control }: { control: Control<ServiceProps> }) => {
   const { fields, append, remove, update } = useFieldArray({
@@ -326,14 +380,12 @@ export default function AddServicePage() {
             <Input {...register("provider")} />
           </Field>
 
-          <Field required label="Description">
-            <Textarea rows={5} {...register("description")} />
+          <Field required label="Provided by">
+            <ProvidedByInput control={control} />
           </Field>
 
-          <Field label="Order No.">
-            <NumberInputRoot>
-              <NumberInputField {...register("indexNumber")} />
-            </NumberInputRoot>
+          <Field required label="Description">
+            <Textarea rows={5} {...register("description")} />
           </Field>
 
           <Controller

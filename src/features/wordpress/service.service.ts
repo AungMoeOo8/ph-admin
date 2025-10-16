@@ -5,6 +5,7 @@ const { VITE_WORDPRESS_DOMAIN } = import.meta.env;
 export type ServiceProps = {
   id: number;
   provider: string;
+  providedBy: number;
   name: string;
   description: string;
   fees: { type: string; amount: number; description: string }[];
@@ -21,7 +22,7 @@ export async function getServices() {
     throw new Error("Internal server error")
   }
 
-  const data: ServiceProps[] = await res.json();
+  const data: (Omit<ServiceProps, "providedBy"> & { providedByName: string })[] = await res.json();
 
   return data
 }
@@ -85,7 +86,7 @@ export async function deleteService(id: number) {
   return data;
 }
 
-export async function reorderServices(services: ServiceProps[]) {
+export async function reorderServices(services: Pick<ServiceProps, "id" | "indexNumber">[]) {
   const res = await fetchFactory.createFetch(
     `${VITE_WORDPRESS_DOMAIN}/wp-json/api/services/reorder`,
     {

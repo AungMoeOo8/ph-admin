@@ -6,7 +6,7 @@ import {
   getCourses,
   updateCourse,
 } from "@/features/wordpress/course.service";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 
 export function useGetAllCourses() {
@@ -33,8 +33,12 @@ export function useCreateCourse() {
   });
 }
 export function useUpdateCourse(courseId: number) {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: (course: z.infer<typeof CourseSchema>) => updateCourse(courseId, course)
+    mutationFn: (course: z.infer<typeof CourseSchema>) => updateCourse(courseId, course),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: ["courses", courseId]})
+    }
   });
 }
 
