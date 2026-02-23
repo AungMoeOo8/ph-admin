@@ -15,6 +15,7 @@ import { Controller, FormProvider, useController, useForm, useFormContext } from
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateBlogProps, CreateBlogSchema } from "@/features/wordpress/blog.service";
 import { useNavigate } from "react-router";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function ImageDialog({ open, setOpen, onEmbedUrlSave, onAssetFileSave }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>>, onEmbedUrlSave: (url: string) => void, onAssetFileSave: (url: string) => void }) {
 
@@ -228,6 +229,21 @@ function BlogForm() {
                     <Controller control={form.control} name="description"
                         render={({ field }) => <Input value={field.value} onChange={field.onChange} />} />
                 </Field>
+                <Controller
+                    control={form.control}
+                    name="visibility"
+                    render={({ field }) => (
+                        <Field>
+                            <Checkbox
+                                mb={8}
+                                checked={field.value}
+                                onCheckedChange={({ checked }) => field.onChange(checked)}
+                            >
+                                {field.value ? "Public" : "Private"}
+                            </Checkbox>
+                        </Field>
+                    )}
+                />
                 <RichTextEditor.Root editor={editor}>
                     <RichTextEditor.Toolbar>
                         <RichTextEditor.ControlGroup>
