@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
-import { DevTool } from "@hookform/devtools"
 import { Checkbox } from "@/components/ui/checkbox";
 
 function BlogCategoryCreateDialog() {
