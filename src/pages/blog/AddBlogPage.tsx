@@ -224,6 +224,10 @@ function BlogForm() {
                     <Controller control={form.control} name="title"
                         render={({ field }) => <Input value={field.value} onChange={field.onChange} />} />
                 </Field>
+                <Field label={"Description"} mb={8}>
+                    <Controller control={form.control} name="description"
+                        render={({ field }) => <Input value={field.value} onChange={field.onChange} />} />
+                </Field>
                 <RichTextEditor.Root editor={editor}>
                     <RichTextEditor.Toolbar>
                         <RichTextEditor.ControlGroup>
