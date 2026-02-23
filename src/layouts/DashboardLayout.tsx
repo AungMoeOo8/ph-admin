@@ -16,7 +16,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { MiddlewareFunction, NavLink, Outlet, redirect } from "react-router";
-import { LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
+import { LuImage, LuImages, LuLibrary, LuList, LuMenu, LuUsers } from "react-icons/lu";
 import { ErrorBoundary } from "react-error-boundary";
 import { useAuth } from "@/hooks/auth";
 import { fetchFactory } from "@/fetchFactory";
@@ -26,6 +26,8 @@ const navLinks = [
   { name: "Service", to: "/dashboard/services", icon: LuList },
   { name: "Course", to: "/dashboard/courses", icon: LuLibrary },
   { name: "Activity", to: "/dashboard/activities", icon: LuImages },
+  { name: "Blog", to: "/dashboard/blogs", icon: LuLibrary },
+  { name: "Asset", to: "/dashboard/assets", icon: LuImage }
 ];
 
 export const dashboardMiddleware: MiddlewareFunction = async ({ request }) => {

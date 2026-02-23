@@ -15,6 +15,12 @@ import App from "./App";
 import DashboardLayout, { dashboardMiddleware } from "./layouts/DashboardLayout";
 import { fetchFactory } from "./fetchFactory";
 import { loginMiddleware } from "./pages/auth/LoginPage";
+import BlogPage from "./pages/blog/BlogPage";
+import AddBlogPage from "./pages/blog/AddBlogPage";
+import AssetPage from "./pages/asset/AssetPage";
+import AddAssetPage from "./pages/asset/AddAssetPage";
+import BlogCategoryPage from "./pages/blog/BlogCategoryPage";
+import EditBlogPage from "./pages/blog/EditBlogPage";
 
 const LoginPage = React.lazy(() => import("./pages/auth/LoginPage"));
 
@@ -86,6 +92,42 @@ const ActivityRoutes: RouteObject = {
   ]
 }
 
+const BlogRoutes: RouteObject = {
+  path: "blogs",
+  children: [
+    {
+      index: true,
+      Component: BlogPage
+    },
+    {
+      path: "new",
+      Component: AddBlogPage
+    },
+    {
+      path: "categories",
+      Component: BlogCategoryPage
+    },
+    {
+      path: ":blogId",
+      Component: EditBlogPage
+    }
+  ]
+}
+
+const AssetRoutes: RouteObject = {
+  path: "assets",
+  children: [
+    {
+      index: true,
+      Component: AssetPage
+    },
+    {
+      path: "new",
+      Component: AddAssetPage
+    }
+  ]
+}
+
 const homePageMiddleware: MiddlewareFunction = ({ request }) => {
   const token = fetchFactory.getToken()
   if (!token) throw redirect(`/login`);
@@ -134,7 +176,9 @@ export const router = createBrowserRouter([
           PeopleRoutes,
           ServiceRoutes,
           CourseRoutes,
-          ActivityRoutes
+          ActivityRoutes,
+          BlogRoutes,
+          AssetRoutes
         ]
       }]
   }
