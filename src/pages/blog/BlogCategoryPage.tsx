@@ -141,7 +141,6 @@ function BlogCategoryEditDialogForm({ blogCategoryId, setOpen }: { blogCategoryI
                 </Dialog.ActionTrigger>
                 <Button onClick={handleSaveBtn}>Save</Button>
             </Dialog.Footer>
-            <DevTool control={control} />
         </>
     )
 }
